@@ -33,9 +33,7 @@ function fetch_item_instance_for_attribute_val_rs($attribute_val, $s_attribute_t
 			ia.s_attribute_type = '$s_attribute_type' ";
 	
 	$results = db_query ( $query );
-	if ($results && db_num_rows ( $results ) > 0) {
-		return $results;
-	}
+	return db_result_or_false($result);
 }
 
 /**
@@ -44,13 +42,7 @@ function fetch_item_instance_for_attribute_val_rs($attribute_val, $s_attribute_t
 function is_exists_attribute_type($s_attribute_type) {
 	$query = "SELECT 'x' FROM s_attribute_type WHERE s_attribute_type = '" . $s_attribute_type . "'";
 	$result = db_query ( $query );
-	if ($result && db_num_rows ( $result ) > 0) {
-		db_free_result ( $result );
-		return TRUE;
-	}
-	
-	//else
-	return FALSE;
+	return db_result_has_rows($result);
 }
 
 /**
@@ -61,13 +53,7 @@ function is_exists_site_item_attribute($site_type, $item_id, $instance_no) {
 	$query = "SELECT 'X' " . "FROM s_attribute_type sit, " . "	item_attribute ia " . "WHERE ia.s_attribute_type = sit.s_attribute_type AND " . "ia.item_id = '" . $item_id . "' AND " . "(ia.instance_no = 0 OR ia.instance_no = '" . $instance_no . "') AND " . "sit.site_type = '" . $site_type . "'";
 	
 	$result = db_query ( $query );
-	if ($result && db_num_rows ( $result ) > 0) {
-		db_free_result ( $result );
-		return TRUE;
-	}
-	
-	//else
-	return FALSE;
+	return db_result_has_rows($result);
 }
 
 /**
@@ -108,10 +94,7 @@ function fetch_attribute_type_lookup_rs($s_attribute_type = NULL, $order_by = 'v
 	}
 	
 	$result = db_query ( $query );
-	if ($result && db_num_rows ( $result ) > 0)
-		return $result;
-	else
-		return FALSE;
+	return db_result_or_false($result);
 }
 
 function fetch_field_type_attribute_lookup_rs($field_type) {
@@ -128,10 +111,7 @@ function fetch_field_type_attribute_lookup_rs($field_type) {
 	ORDER BY order_no, value ASC";
 	
 	$result = db_query ( $query );
-	if ($result && db_num_rows ( $result ) > 0)
-		return $result;
-	else
-		return FALSE;
+	return db_result_or_false($result);
 }
 
 /**
@@ -150,33 +130,17 @@ function fetch_attribute_type_lookup_r($s_attribute_type, $value, $column = NULL
 	WHERE satl.s_attribute_type = '" . $s_attribute_type . "' AND satl.value = '$value'";
 	
 	$result = db_query ( $query );
-	if ($result && db_num_rows ( $result ) > 0) {
-		$found = db_fetch_assoc ( $result );
-		db_free_result ( $result );
-		
-		if ($column != NULL)
-			return $found [$column];
-		else
-			return $found;
-	} else
-		return FALSE;
+	return db_result_single_lookup($result, $column);
 }
 
 function fetch_value_match_attribute_type_lookup_rs($s_attribute_type, $value_array, $order_by = 'value', $order = 'asc') {
-	$query = "SELECT satl.value, IF(LENGTH(IFNULL(stlv.value, display))>0,IFNULL(stlv.value, display),satl.value) AS display, img, checked_ind " . "FROM s_attribute_type_lookup satl
-			LEFT JOIN s_table_language_var stlv
-			ON stlv.language = '" . get_opendb_site_language () . "' AND
-			stlv.tablename = 's_attribute_type_lookup' AND
-			stlv.columnname = 'display' AND
-			stlv.key1 = s_attribute_type AND
-			stlv.key2 = satl.value 
-			WHERE satl.s_attribute_type = '" . $s_attribute_type . "' AND satl.value IN (" . format_sql_in_clause ( $value_array ) . ") " . "ORDER BY satl.order_no, $order_by $order";
+	$query = "SELECT satl.value, IF(LENGTH(IFNULL(stlv.value, display))>0,IFNULL(stlv.value, display),satl.value) AS display, img, checked_ind " .
+	    "FROM s_attribute_type_lookup satl LEFT JOIN s_table_language_var stlv ON stlv.language = '" . get_opendb_site_language () .
+	    "' AND stlv.tablename = 's_attribute_type_lookup' AND stlv.columnname = 'display' AND stlv.key1 = s_attribute_type AND stlv.key2 = satl.value WHERE satl.s_attribute_type = '" .
+	    $s_attribute_type . "' AND satl.value IN (" . format_sql_in_clause ( $value_array ) . ") " . "ORDER BY satl.order_no, $order_by $order";
 	
 	$result = db_query ( $query );
-	if ($result && db_num_rows ( $result ) > 0)
-		return $result;
-	else
-		return FALSE;
+	return db_result_or_false($result);
 }
 
 /**
@@ -185,19 +149,16 @@ function fetch_value_match_attribute_type_lookup_rs($s_attribute_type, $value_ar
 */
 function fetch_attribute_type_lookup_value($s_attribute_type, $value) {
 	if (strlen ( $value ) > 0) {
-		$query = "SELECT value FROM s_attribute_type_lookup " . "WHERE s_attribute_type = '" . $s_attribute_type . "' AND " . "LOWER(value) = '" . strtolower ( $value ) . "' OR LOWER(display) = '" . strtolower ( $value ) . "'";
+	    $esc = db_escape(strtolower ( $value ) );
+	    
+		$query = "SELECT value FROM s_attribute_type_lookup " . "WHERE s_attribute_type = '" . $s_attribute_type .
+		    "' AND LOWER(value) = '" . $esc .
+		    "' OR LOWER(display) = '" . $esc . "'";
 		
 		$result = db_query ( $query );
-		if ($result && db_num_rows ( $result ) > 0) {
-			$found = db_fetch_assoc ( $result );
-			db_free_result ( $result );
-			return $found ['value'];
-		} else {
-			return FALSE;
-		}
-	} else {
-		return FALSE;
+		return db_result_single_lookup($result, 'value');
 	}
+	return FALSE;
 }
 
 /*
@@ -208,65 +169,32 @@ function is_exists_lookup_value($s_attribute_type, $attribute_val) {
 	$query = "SELECT 'x' FROM s_attribute_type_lookup WHERE s_attribute_type = '$s_attribute_type' AND " . "value = '" . addslashes ( $attribute_val ) . "' LIMIT 0,1";
 	
 	$result = db_query ( $query );
-	if ($result && db_num_rows ( $result ) > 0) {
-		db_free_result ( $result );
-		return TRUE;
-	}
-	
-	//else
-	return FALSE;
+	return db_result_has_rows($result);
 }
 
 function is_lookup_attribute_type($s_attribute_type) {
 	$query = "SELECT lookup_attribute_ind FROM s_attribute_type WHERE s_attribute_type = '$s_attribute_type'";
 	
 	$result = db_query ( $query );
-	if ($result && db_num_rows ( $result ) > 0) {
-		$found = db_fetch_assoc ( $result );
-		db_free_result ( $result );
-		if ($found ['lookup_attribute_ind'] == 'Y')
-			return TRUE;
-		else
-			return FALSE;
-	}
-	
-	//else
-	return FALSE;
+	return (db_result_single_lookup($result, 'lookup_attribute_ind') == 'Y');
 }
 
 function is_multivalue_attribute_type($s_attribute_type) {
 	$query = "SELECT multi_attribute_ind, lookup_attribute_ind FROM s_attribute_type WHERE s_attribute_type = '$s_attribute_type'";
 	
 	$result = db_query ( $query );
-	if ($result && db_num_rows ( $result ) > 0) {
-		$found = db_fetch_assoc ( $result );
-		db_free_result ( $result );
-		
-		if ($found ['lookup_attribute_ind'] == 'Y' || $found ['multi_attribute_ind'] == 'Y')
-			return TRUE;
-		else
-			return FALSE;
-	}
-	
-	//else
-	return FALSE;
+	$found = db_result_single_row($result);
+	$rc = FALSE;
+	if ($found !== FALSE)
+		$rc = ($found ['lookup_attribute_ind'] == 'Y' || $found ['multi_attribute_ind'] == 'Y');
+	return $rc;
 }
 
 function is_file_resource_attribute_type($s_attribute_type) {
 	$query = "SELECT file_attribute_ind FROM s_attribute_type WHERE s_attribute_type = '$s_attribute_type'";
 	
 	$result = db_query ( $query );
-	if ($result && db_num_rows ( $result ) > 0) {
-		$found = db_fetch_assoc ( $result );
-		db_free_result ( $result );
-		if ($found ['file_attribute_ind'] == 'Y')
-			return TRUE;
-		else
-			return FALSE;
-	}
-	
-	//else
-	return FALSE;
+	return (db_result_single_lookup($result, 'file_attribute_ind') == 'Y');
 }
 
 function is_valid_field_type($field_type) {
@@ -284,21 +212,14 @@ function is_valid_field_type($field_type) {
 function fetch_sfieldtype_item_attribute_type($s_item_type, $s_field_type) {
 	$attribute_type_r = fetch_sfieldtype_item_attribute_type_r ( $s_item_type, $s_field_type );
 	if ($attribute_type_r)
-		return $attribute_type_r ['s_attribute_type'];
+		return $attribute_type_r['s_attribute_type'];
 	else
 		return FALSE;
 }
 
 function fetch_sfieldtype_item_attribute_type_r($s_item_type, $s_field_type) {
-	$results = fetch_item_attribute_type_rs ( $s_item_type, $s_field_type );
-	if ($results) {
-		$record_r = db_fetch_assoc ( $results );
-		db_free_result ( $results );
-		return $record_r;
-	}
-	
-	//else
-	return FALSE;
+	$results = fetch_item_attribute_type_rs( $s_item_type, $s_field_type );
+	return db_result_single_row($results);
 }
 
 /**
@@ -400,10 +321,7 @@ function fetch_item_attribute_type_rs($s_item_type, $restrict_type = NULL, $orde
 	}
 	
 	$result = db_query ( $query );
-	if ($result && db_num_rows ( $result ) > 0)
-		return $result;
-	else
-		return FALSE;
+	return db_result_or_false($result);
 }
 
 function fetch_s_item_type_attr_prompt($s_item_type, $s_attribute_type, $order_no = NULL) {
@@ -424,12 +342,7 @@ function fetch_s_item_type_attr_prompt($s_item_type, $s_attribute_type, $order_n
 		$query .= "AND sat.order_no = '$order_no' ";
 	
 	$result = db_query ( $query );
-	if ($result && db_num_rows ( $result ) > 0) {
-		$found = db_fetch_assoc ( $result );
-		db_free_result ( $result );
-		return $found ['prompt'];
-	} else
-		return FALSE;
+	return db_result_single_lookup($result, 'prompt');
 }
 
 function fetch_s_item_attribute_type_next_order_no($s_item_type, $s_attribute_type, $order_no = NULL) {
@@ -442,12 +355,7 @@ function fetch_s_item_attribute_type_next_order_no($s_item_type, $s_attribute_ty
 	$query .= "ORDER BY order_no ASC LIMIT 0,1";
 	
 	$result = db_query ( $query );
-	if ($result && db_num_rows ( $result ) > 0) {
-		$found = db_fetch_assoc ( $result );
-		db_free_result ( $result );
-		return $found ['order_no'];
-	} else
-		return FALSE;
+	return db_result_single_lookup($result, 'order_no');
 }
 
 function fetch_attribute_type_r($s_attribute_type) {
@@ -462,26 +370,13 @@ function fetch_attribute_type_r($s_attribute_type) {
 				stlv2.key1 = sat.s_attribute_type " . "WHERE	sat.s_attribute_type = '" . $s_attribute_type . "'";
 	
 	$result = db_query ( $query );
-	if ($result && db_num_rows ( $result ) > 0) {
-		$record_r = db_fetch_assoc ( $result );
-		db_free_result ( $result );
-		return $record_r;
-	} else
-		return FALSE;
+	return db_result_single_row($result);
 }
 
 function fetch_attribute_type_cnt($s_attribute_type) {
 	$query = "SELECT count('x') as count FROM s_attribute_type_lookup WHERE s_attribute_type = '" . $s_attribute_type . "'";
 	$result = db_query ( $query );
-	if ($result && db_num_rows ( $result ) > 0) {
-		$found = db_fetch_assoc ( $result );
-		db_free_result ( $result );
-		if ($found !== FALSE)
-			return $found ['count'];
-	}
-	
-	//else
-	return FALSE;
+	return db_result_single_lookup($result, 'count');
 }
 
 /**
@@ -552,15 +447,9 @@ function is_item_attribute_set($item_id, $instance_no, $s_attribute_type, $order
 			$query .= "AND order_no = '" . $order_no . "'";
 		
 		$result = db_query ( $query );
-		if ($result && db_num_rows ( $result ) > 0) {
-			$record_r = db_fetch_assoc ( $result );
-			db_free_result ( $result );
-			if ($record_r !== FALSE && $record_r ['count'] > 0)
-				return TRUE;
-		}
+		$count = db_result_single_lookup($result, 'count');
+		return ($count && $count > 0);
 	}
-	
-	//else
 	return FALSE;
 }
 
@@ -571,14 +460,14 @@ function is_item_attribute_set($item_id, $instance_no, $s_attribute_type, $order
 function validate_attribute_val_r($attribute_val_r, $remove_duplicates = FALSE) {
 	$value_r = array ();
 	
-	if (! is_array ( $attribute_val_r ) && strlen ( trim ( $attribute_val_r ) ) > 0)
+	if (! is_array( $attribute_val_r) && strlen ( trim ( $attribute_val_r ) ) > 0)
 		$value_r [] = addslashes ( trim ( replace_newlines ( $attribute_val_r ) ) );
 	else {
 		for($i = 0; $i < count ( $attribute_val_r ); $i ++) {
 			$value = addslashes ( trim ( replace_newlines ( $attribute_val_r [$i] ) ) );
 			
 			// lets make sure this $value does not already exist
-			if (strlen ( $value ) > 0 && (! $remove_duplicates || ! is_array ( $value_r ) || array_search ( $value, $value_r ) === FALSE)) {
+			if (strlen ( $value ?? "") > 0 && (! $remove_duplicates || ! is_array ( $value_r ) || array_search ( $value, $value_r ) === FALSE)) {
 				$value_r [] = $value;
 			}
 		}
@@ -664,8 +553,8 @@ function get_filename_list($file_r) {
 			 ia.attribute_val LIKE '{$file_r['name']}%.{$file_r['extension']}'";
 	
 	$filename_r = array ();
-	$results = db_query ( $query );
-	if ($results && db_num_rows ( $results ) > 0) {
+	$results = db_result_or_false(db_query( $query ));
+	if ($results) {
 		while ( $item_attribute_r = db_fetch_assoc ( $results ) ) {
 			$filename_r [] = $item_attribute_r ['attribute_val'];
 		}
@@ -686,12 +575,7 @@ function is_exists_upload_file_item_attribute($filename) {
 			ia.attribute_val = '$filename'";
 	
 	$result = db_query ( $query );
-	if ($result && db_num_rows ( $result ) > 0) {
-		db_free_result ( $result );
-		return TRUE;
-	}
-	
-	return FALSE;
+	return db_result_has_rows($result);
 }
 
 /**
@@ -890,33 +774,27 @@ function update_item_attribute($item_id, $instance_no, $s_attribute_type, $order
 Does not delete any item cache files
 */
 function delete_item_attributes($item_id, $instance_no = NULL, $s_attribute_type = NULL, $order_no = NULL) {
-	$query = "DELETE FROM item_attribute " . "WHERE item_id = '" . $item_id . "' ";
+    $query = "DELETE FROM item_attribute " . "WHERE item_id = '" . $item_id . "' ";
 	
-	if (is_numeric ( $instance_no ))
-		$query .= "AND (instance_no = 0 OR instance_no = " . $instance_no . ") ";
+    if (is_numeric( $instance_no ))
+	$query .= "AND (instance_no = 0 OR instance_no = " . $instance_no . ") ";
 	
-	if (strlen ( $s_attribute_type ) > 0)
-		$query .= "AND s_attribute_type = '" . $s_attribute_type . "' ";
+    if (strlen ( $s_attribute_type ) > 0)
+	$query .= "AND s_attribute_type = '" . $s_attribute_type . "' ";
 	
-	if (is_numeric ( $order_no ))
-		$query .= "AND order_no = '" . $order_no . "'";
+    if (is_numeric ( $order_no ))
+	$query .= "AND order_no = '" . $order_no . "'";
 	
-	$delete = db_query ( $query );
-	if ($delete) {	// Even if no attributes were deleted, because there were none, this should still return true.
-		if (db_affected_rows () > 0)
-			opendb_logger ( OPENDB_LOG_INFO, __FILE__, __FUNCTION__, NULL, array (
-					$item_id,
-					$instance_no,
-					$s_attribute_type,
-					$order_no ) );
-		return TRUE;
-	} else {
-		opendb_logger ( OPENDB_LOG_ERROR, __FILE__, __FUNCTION__, db_error (), array (
-				$item_id,
-				$instance_no,
-				$s_attribute_type,
-				$order_no ) );
-		return FALSE;
-	}
+    $delete = db_query ( $query );
+    if ($delete) {	// Even if no attributes were deleted, because there were none, this should still return true.
+	if (db_affected_rows () > 0)
+	    opendb_logger ( OPENDB_LOG_INFO, __FILE__, __FUNCTION__, NULL,
+			    array ($item_id, $instance_no, $s_attribute_type, $order_no ) );
+	return TRUE;
+    } else {
+	opendb_logger ( OPENDB_LOG_ERROR, __FILE__, __FUNCTION__, db_error (),
+			array ($item_id, $instance_no, $s_attribute_type, $order_no ) );
+	return FALSE;
+    }
 }
 ?>

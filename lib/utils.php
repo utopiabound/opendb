@@ -392,6 +392,68 @@ function fetch_results_array($results) {
 }
 
 /**
+ * Return db result from query if any rows are returned, else FALSE
+ *
+ * @param db_result $result
+ */
+function db_result_or_false($result) {
+    $rc = FALSE;
+	if ($result) {
+		if (db_num_rows($result) > 0)
+			$rc = $result;
+		else
+			db_free_result($result);
+	}
+
+	return $rc;
+}
+
+/**
+ * Determine if result has rows, consumes result
+ *
+ * @param db_result $result
+ */
+function db_result_has_rows($result) {
+	$rc = FALSE;
+	if ($result) {
+		if (db_num_rows($result) > 0)
+			$rc = TRUE;
+		db_free_result($result);
+	}
+	return $rc;
+}
+
+/**
+ * Determine if result has rows, consumes result
+ *
+ * @param db_result $result
+ */
+function db_result_single_lookup($result, $lookup) {
+	$found = db_result_single_row($result);
+	if ($found !== FALSE) {
+		if (isset($lookup))
+			return $found[$lookup];
+		return $found;
+	}
+	return FALSE;
+}
+
+/**
+ * Fetch first row of $result, or return FALSE, consumes $result
+ *
+ * @param db_result $result
+ */
+function db_result_single_row($result) {
+	$rc = FALSE;
+	if ($result) {
+		if (db_num_rows( $result ) > 0)
+			$rc = db_fetch_assoc( $result );
+		db_free_result( $result );
+	}
+	return $rc;
+}
+
+/**
  * http://se2.php.net/manual/en/function.print-r.php#75872
  * 
   * An alternative to print_r that unlike the original does not use output buffering with

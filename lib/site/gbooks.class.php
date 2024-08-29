@@ -28,76 +28,71 @@
 include_once("./lib/SitePlugin.class.php");
 
 class gbooks extends SitePlugin {
+    var $base_url='https://www.googleapis.com/books/v1/volumes';
 	
-	var $base_url='https://www.googleapis.com/books/v1/volumes';
-	
-	function __construct($site_type) {
-		parent::__construct($site_type);
+    function __construct($site_type) {
+	parent::__construct($site_type);
+    }
+
+    function queryListing($page_no, $items_per_page, $offset, $s_item_type, $search_vars_r) {
+	// standard block of code to cater for refresh option, where item already has
+	// reference to site item unique ID.
+	if (isset($search_vars_r['gbooks_id']) && strlen($search_vars_r['gbooks_id']) > 0) {
+	    $this->addListingRow(NULL, NULL, NULL, array('gbooks_id' => $search_vars_r['gbooks_id']));
+	    return TRUE;
 	}
 
-	function queryListing($page_no, $items_per_page, $offset, $s_item_type, $search_vars_r) {
-		// standard block of code to cater for refresh option, where item already has
-		// reference to site item unique ID.
-		if (strlen($search_vars_r['gbooks_id']) > 0) {
-			$this->addListingRow(NULL, NULL, NULL, array('gbooks_id' => $search_vars_r['gbooks_id']));
-			return TRUE;
+	// compose search query - Google Books API has the following definitions:
+	/* q - Search for volumes that contain this text string. 
+	 * There are special keywords you can specify in the search terms to search in particular fields, such as:
+	 *   intitle:     Returns results where the text following this keyword is found in the title.
+	 *   inauthor:    Returns results where the text following this keyword is found in the author.
+	 *   inpublisher: Returns results where the text following this keyword is found in the publisher.
+	 *   subject:     Returns results where the text following this keyword is listed in the category list of the volume.
+	 *   isbn:        Returns results where the text following this keyword is the ISBN number.
+	 *   lccn:        Returns results where the text following this keyword is the Library of Congress Control Number.
+	 *   oclc:        Returns results where the text following this keyword is the Online Computer Library Center number.
+	 */
+
+	$search_query = array();
+	if (isset($search_vars_r['author']) && strlen($search_vars_r['author']) > 0)
+	    $search_query[] = 'inauthor:'.urlencode('"'.$search_vars_r['author'].'"');
+
+	if (isset($search_vars_r['title']) && strlen($search_vars_r['title']) > 0)
+	    $search_query[] = 'intitle:'.urlencode('"'.$search_vars_r['title'].'"');
+
+	if (isset($search_vars_r['isbn']) && strlen($search_vars_r['isbn']) > 0)
+	    $search_query[] = 'isbn:'.urlencode($search_vars_r['isbn']);
+
+	$result = json_decode($this->fetchURI($this->base_url . '?q=' . join('+',$search_query),true),true);		
+
+	// Get number of matches
+	if (isset($result['totalItems']) && ($result['totalItems'] > 0)) {
+	    foreach($result['items'] as $item) {
+		$vol = $item['volumeInfo'];
+		$title ='';
+		isset($vol['title'])		&& $title = $vol['title'];
+		isset($vol['subtitle'])		&& $title .= " - ". $vol['subtitle'];
+		isset($vol['publishedDate'])	&& $title .= " (".$vol['publishedDate'] . ')';
+		isset($vol['authors'])	        && $title .= " by " . join("; ", $vol['authors']);
+		$cover_image_url = (isset($vol['imageLinks']) ? $vol['imageLinks']['thumbnail'] : NULL );
+		$comments="";
+		if (isset($vol['industryIdentifiers'])) {
+		    $iids = array();
+		    foreach ($vol["industryIdentifiers"] as $iid){
+			$iids[] = $iid["type"] . ": " . $iid["identifier"];
+		    }
+		    $comments = join(", ", $iids);
 		}
-
-		// compose search query - Google Books API has the following definitions:
-		/* q - Search for volumes that contain this text string.
-		 * There are special keywords you can specify in the search terms to search in particular fields, such as:
-		 *   intitle:     Returns results where the text following this keyword is found in the title.
-		 *   inauthor:    Returns results where the text following this keyword is found in the author.
-		 *   inpublisher: Returns results where the text following this keyword is found in the publisher.
-		 *   subject:     Returns results where the text following this keyword is listed in the category list of the volume.
-		 *   isbn:        Returns results where the text following this keyword is the ISBN number.
-		 *   lccn:        Returns results where the text following this keyword is the Library of Congress Control Number.
-		 *   oclc:        Returns results where the text following this keyword is the Online Computer Library Center number.
-		 */
-
-		$search_query = array();
-		if (strlen($search_vars_r['author']) > 0)
-			$search_query[] = 'inauthor:'.urlencode('"'.$search_vars_r['author'].'"');
-		if (strlen($search_vars_r['title']) > 0)
-			$search_query[] = 'intitle:'.urlencode('"'.$search_vars_r['title'].'"');
-		if (strlen($search_vars_r['isbn']) > 0)
-			$search_query[] = 'isbn:'.urlencode(trim(str_replace('-', '', $search_vars_r['isbn'])));
-		
-		$result = json_decode($this->fetchURI($this->base_url . '?q=' . join('+',$search_query),true),true);		
-
-		// Get number of matches
-		if(isset($result['totalItems'])&& ($result['totalItems'] > 0) ) {
-			foreach($result['items'] as $item) {
-				$vol = $item['volumeInfo'];
-				$title ='';
-				isset($vol['title'])			&& $title = $vol['title'] . ' ';
-				isset($vol['subtitle'])			&& $title .= '- '. $vol['subtitle'] . ' ';
-				isset($vol['publishedDate'])	&& $title .= '('.$vol['publishedDate'] . ') ';
-				isset($vol['authors'])			&& $title .= 'by ' . join('; ', $vol['authors']);
-				$cover_image_url = (isset($vol['imageLinks']) ? $vol['imageLinks']['thumbnail'] : NULL );
-				if ($cover_image_url != NULL) {
-					$cover_image_url = preg_replace("!edge=\w+&!", "", $cover_image_url);
-					$cover_image_url = preg_replace("!zoom=\d+&!", "zoom=1&", $cover_image_url);
-					$cover_image_url = preg_replace("!imgtk=\w+&!", "", $cover_image_url);
-				}
-				$comments='';
-					if(isset($vol['industryIdentifiers'])){
-						$iids = array();
-						foreach($vol['industryIdentifiers'] as $iid){
-							$iids[] = $iid['type'] .': '. $iid['identifier'];
-						}
-						$comments = join(', ',$iids);
-					}
-				$attributes_r=array('gbooks_id' => $item['id']);
-				$this->addListingRow($title, $cover_image_url, $comments, $attributes_r);
-			}
-		}
-		return TRUE;
+		$attributes_r = array("gbooks_id" => $item["id"]);
+		$this->addListingRow($title, $cover_image_url, $comments, $attributes_r);
+	    }
+	    return TRUE;
 	}
 
 	function queryItem($search_attributes_r, $s_item_type) {
-		$result = json_decode($this->fetchURI($this->base_url . '/' . $search_attributes_r['gbooks_id'],true),true);		
-		//echo('GBOOKS debug: '.print_r($result,true).'<br/>');
+	    $result = json_decode($this->fetchURI($this->base_url . '/' . $search_attributes_r['gbooks_id'],true),true);
+	    //echo('GBOOKS debug: '.print_r($result,true).'<br/>');
 
 		// make sure we actually got data
 		if(!isset($result['id'])) {
@@ -160,5 +155,7 @@ class gbooks extends SitePlugin {
 
 		return TRUE;
 	}
+    }
 }
+
 ?>

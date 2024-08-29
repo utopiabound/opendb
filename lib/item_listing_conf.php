@@ -23,20 +23,14 @@ include_once("./lib/item_type.php");
 function fetch_item_listing_conf_rs() {
 	$query = "SELECT id, s_item_type, s_item_type_group FROM s_item_listing_conf";
 	$result = db_query ( $query );
-	if ($result && db_num_rows ( $result ) > 0)
-		return $result;
-	else
-		return FALSE;
+	return db_result_or_false($result);
 }
 
 function fetch_s_item_listing_column_conf_rs($silc_id) {
 	$query = 'SELECT column_no, column_type, s_field_type, s_attribute_type, override_prompt, orderby_support_ind, orderby_datatype, orderby_sort_order, orderby_default_ind, printable_support_ind ' . 'FROM s_item_listing_column_conf ' . 'WHERE silc_id = ' . $silc_id . ' ' . 'ORDER BY column_no';
 	
 	$result = db_query ( $query );
-	if ($result && db_num_rows ( $result ) > 0)
-		return $result;
-	else
-		return FALSE;
+	return db_result_or_false($result);
 }
 
 function fetch_s_item_listing_conf_id($s_item_type_group, $s_item_type) {
@@ -49,14 +43,7 @@ function fetch_s_item_listing_conf_id($s_item_type_group, $s_item_type) {
 	$query = "SELECT id FROM s_item_listing_conf WHERE s_item_type_group = '$s_item_type_group' AND s_item_type = '$s_item_type'";
 	
 	$result = db_query ( $query );
-	if ($result && db_num_rows ( $result ) > 0) {
-		$found = db_fetch_assoc ( $result );
-		db_free_result ( $result );
-		return $found ['id'];
-	}
-	
-	//else
-	return FALSE;
+	return db_result_single_lookup($result, 'id');
 }
 
 function is_exists_s_item_listing_column_conf($silc_id, $s_item_type_group = NULL, $s_item_type = NULL) {
@@ -67,13 +54,8 @@ function is_exists_s_item_listing_column_conf($silc_id, $s_item_type_group = NUL
 		$query = "SELECT 'x' FROM s_item_listing_column_conf WHERE silc_id = $silc_id";
 		
 		$result = db_query ( $query );
-		if ($result && db_num_rows ( $result ) > 0) {
-			db_free_result ( $result );
-			return TRUE;
-		}
+		return db_result_has_rows($result);
 	}
-	
-	//else
 	return FALSE;
 }
 

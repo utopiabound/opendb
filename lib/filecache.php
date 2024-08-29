@@ -416,16 +416,7 @@ function fetch_url_file_cache_r($url, $cache_type = 'HTTP', $mode = EXCLUDE_EXPI
 	}
 	
 	$result = db_query ( $query );
-	if ($result && db_num_rows ( $result ) > 0) {
-		$record_r = db_fetch_assoc ( $result );
-		db_free_result ( $result );
-		if ($record_r !== FALSE) {
-			return $record_r;
-		}
-	}
-	
-	//else
-	return FALSE;
+	return db_result_single_row($result);
 }
 
 /**
@@ -686,10 +677,12 @@ function file_cache_insert_file($url, $location, $content_type, $content, $cache
 		$file_cache_r ['content_type'] = validate_content_type ( ifempty ( $content_type, $file_cache_r ['content_type'] ) );
 		
 		$thumbnail_support = FALSE;
-		if (strlen ( $file_cache_r ['content_type'] ) > 0) {
-			$file_type_r = fetch_file_type_r ( $file_cache_r ['content_type'] );
-			$file_cache_r ['extension'] = $file_type_r ['extension'];
-			$thumbnail_support = ($file_type_r ['thumbnail_support_ind'] == 'Y');
+		if (strlen( $file_cache_r['content_type'] ) > 0) {
+			$file_type_r = fetch_file_type_r( $file_cache_r['content_type'] );
+			if ($file_type_r !== FALSE) {
+			    $file_cache_r['extension'] = $file_type_r['extension'];
+			    $thumbnail_support = ($file_type_r['thumbnail_support_ind'] == 'Y');
+			}
 		} else {
 			$extension = get_file_ext ( $file_cache_r ['url'] );
 			

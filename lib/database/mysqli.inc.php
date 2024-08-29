@@ -124,6 +124,12 @@ function db_query($sql, $link = NULL) {
 	return @mysqli_query($link != NULL ? $link : $_opendb_dblink, $sql);
 }
 
+function db_escape($string, $link = NULL) {
+	global $_opendb_dblink;
+
+	return @mysqli_real_escape_string($link != NULL ? $link : $_opendb_dblink, $string);
+}
+
 function db_affected_rows($link = NULL) {
 	global $_opendb_dblink;
 

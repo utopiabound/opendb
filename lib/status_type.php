@@ -27,13 +27,7 @@ include_once("./lib/language.php");
 function is_valid_s_status_type($s_status_type) {
 	$query = "SELECT 'X' FROM s_status_type WHERE s_status_type = '$s_status_type'";
 	$result = db_query ( $query );
-	if ($result && db_num_rows ( $result ) > 0) {
-		db_free_result ( $result );
-		return TRUE;
-	}
-	
-	//else
-	return FALSE;
+	return db_result_has_rows($result);
 }
 
 /*
@@ -46,10 +40,7 @@ function fetch_newitem_status_type_rs() {
 			stlv.key1 = sst.s_status_type " . "WHERE sst.closed_ind <> 'Y' " . "ORDER BY 1 ASC";
 	
 	$result = db_query ( $query );
-	if ($result && db_num_rows ( $result ) > 0)
-		return $result;
-	else
-		return FALSE;
+	return db_result_or_false( $result );
 }
 
 function fetch_update_status_type_rs($status_type) {
@@ -64,10 +55,7 @@ function fetch_update_status_type_rs($status_type) {
 	$query .= "ORDER BY 1 ASC";
 	
 	$result = db_query ( $query );
-	if ($result && db_num_rows ( $result ) > 0)
-		return $result;
-	else
-		return FALSE;
+	return db_result_or_false( $result );
 }
 
 function fetch_status_type_rs($lookup_mode = FALSE) {
@@ -91,11 +79,8 @@ function fetch_status_type_rs($lookup_mode = FALSE) {
 	
 	$query .= " ORDER BY s_status_type ASC";
 	
-	$result = db_query ( $query );
-	if ($result && db_num_rows ( $result ) > 0)
-		return $result;
-	else
-		return FALSE;
+	$result = db_query( $query );
+	return db_result_or_false( $result );
 }
 
 function fetch_status_type_r($s_status_type) {
@@ -108,26 +93,14 @@ function fetch_status_type_r($s_status_type) {
 			stlv.key1 = sst.s_status_type " . "WHERE sst.s_status_type = '$s_status_type' " . "LIMIT 0,1";
 	
 	$result = db_query ( $query );
-	if ($result && db_num_rows ( $result ) > 0) {
-		$found = db_fetch_assoc ( $result );
-		db_free_result ( $result );
-		return $found;
-	} else
-		return FALSE;
+	return db_result_single_row( $result );
 }
 
 function fetch_default_status_type() {
 	$query = "SELECT sst.s_status_type " . "FROM s_status_type sst " . "WHERE sst.closed_ind <> 'Y' AND " . "sst.default_ind = 'Y' " . "ORDER BY 1 ASC LIMIT 0,1";
 	
 	$result = db_query ( $query );
-	if ($result && db_num_rows ( $result ) > 0) {
-		$found = db_fetch_assoc ( $result );
-		if ($found) {
-			db_free_result ( $result );
-			return $found ['s_status_type'];
-		}
-	} else
-		return FALSE;
+	return db_result_single_lookup($result, 's_status_type');
 }
 
 /*

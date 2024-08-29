@@ -522,10 +522,10 @@ class SitePlugin {
 			unset ( $this->_item_list_rs );
 			
 			// initialise if not set.
-			if (! is_numeric ( $HTTP_VARS ['page_no'] ))
-				$this->_page_no = 1;
+			if (isset($HTTP_VARS ['page_no']) && is_numeric($HTTP_VARS ['page_no']))
+				$this->_page_no = $HTTP_VARS['page_no'];
 			else
-				$this->_page_no = $HTTP_VARS ['page_no'];
+				$this->_page_no = 1;
 			
 			if ($this->_page_no > 1)
 				$this->_is_previous_page = TRUE;

@@ -68,15 +68,9 @@ function is_user_owner_of_item($item_id, $instance_no, $user_id = NULL) {
 		$query .= " AND instance_no = '$instance_no' ";
 	
 	$result = db_query ( $query );
-	if ($result && db_num_rows ( $result ) > 0) {
-		db_free_result ( $result );
-		// The very fact that at least one row was returned indicates that owner
-		// has at least one instance of item.
-		return TRUE;
-	}
-	
-	//else
-	return FALSE;
+	// The very fact that at least one row was returned indicates that owner
+	// has at least one instance of item.
+	return db_result_has_rows($result);
 }
 
 /**
@@ -84,29 +78,13 @@ function is_user_owner_of_item($item_id, $instance_no, $user_id = NULL) {
 function fetch_item_owner_id($item_id, $instance_no) {
 	$query = "SELECT owner_id FROM item_instance WHERE item_id = '$item_id' AND instance_no = '$instance_no'";
 	$result = db_query ( $query );
-	if ($result && db_num_rows ( $result ) > 0) {
-		$found = db_fetch_assoc ( $result );
-		if ($found) {
-			db_free_result ( $result );
-			return $found ['owner_id'];
-		}
-	}
-	//else
-	return FALSE;
+	return db_result_single_lookup($result, 'owner_id');
 }
 
 function fetch_item_s_status_type($item_id, $instance_no) {
 	$query = "SELECT s_status_type FROM item_instance WHERE item_id = '$item_id' AND instance_no = '$instance_no'";
 	$result = db_query ( $query );
-	if ($result && db_num_rows ( $result ) > 0) {
-		$found = db_fetch_assoc ( $result );
-		if ($found) {
-			db_free_result ( $result );
-			return $found ['s_status_type'];
-		}
-	}
-	//else
-	return FALSE;
+	return db_result_single_lookup($result, 's_status_type');
 }
 
 /**
@@ -128,17 +106,7 @@ function fetch_item_instance_cnt($s_item_type = NULL) {
 	}
 	
 	$query .= "$from $where";
-	
-	$result = db_query ( $query );
-	if ($result && db_num_rows ( $result ) > 0) {
-		$found = db_fetch_assoc ( $result );
-		db_free_result ( $result );
-		if ($found !== FALSE)
-			return $found ['count'];
-	}
-	
-	//else
-	return FALSE;
+	return db_result_single_lookup($result, 'count');
 }
 
 /**
@@ -160,10 +128,7 @@ function fetch_item_instance_rs($item_id, $owner_id = NULL) {
 	$query .= " ORDER BY ii.instance_no	";
 	
 	$result = db_query ( $query );
-	if ($result && db_num_rows ( $result ) > 0)
-		return $result;
-	else
-		return FALSE;
+	return db_result_or_false($result);
 }
 
 /**
@@ -191,15 +156,7 @@ function fetch_owner_item_cnt($owner_id, $s_item_type = NULL) {
 	$query .= "$from $where";
 	
 	$result = db_query ( $query );
-	if ($result && db_num_rows ( $result ) > 0) {
-		$found = db_fetch_assoc ( $result );
-		db_free_result ( $result );
-		if ($found !== FALSE)
-			return $found ['count'];
-	}
-	
-	//else
-	return FALSE;
+	return db_result_single_lookup($result, 'count');
 }
 
 /*
@@ -213,15 +170,7 @@ function fetch_owner_s_status_type_item_cnt($owner_id, $s_status_type) {
 	}
 
 	$result = db_query ( $query );
-	if ($result && db_num_rows ( $result ) > 0) {
-		$found = db_fetch_assoc ( $result );
-		db_free_result ( $result );
-		if ($found !== FALSE)
-			return $found ['count'];
-	}
-	
-	//else
-	return FALSE;
+	return db_result_single_lookup($result, 'count');
 }
 
 /**
@@ -241,16 +190,7 @@ function fetch_category_item_cnt($category, $s_item_type = NULL) {
 	}
 	
 	$result = db_query ( $query );
-	if ($result && db_num_rows ( $result ) > 0) {
-		$found = db_fetch_assoc ( $result );
-		db_free_result ( $result );
-		if ($found !== FALSE) {
-			return $found ['count'];
-		}
-	}
-	
-	//else
-	return FALSE;
+	return db_result_single_lookup($result, 'count');
 }
 
 /*
@@ -267,16 +207,15 @@ function fetch_owner_item_instance_rs($owner_id) {
 			WHERE i.id = ii.item_id AND ii.owner_id='" . $owner_id . "' ";
 	
 	$result = db_query ( $query );
-	if ($result && db_num_rows ( $result ) > 0)
-		return $result;
-	else
-		return FALSE;
+	return db_result_or_false($result);
 }
 
 define ( 'RELATED_CHILDREN_MODE', 'CHILDREN' );
 define ( 'RELATED_PARENTS_MODE', 'PARENTS' );
 
 function fetch_item_instance_relationship_rs($item_id, $instance_no = NULL, $related_mode = RELATED_CHILDREN_MODE) {
+	if ($item_id == NULL)
+		return false;
 	$query = "SELECT DISTINCT ii.item_id, 
 					ii.instance_no, 
 					i.title,
@@ -313,14 +252,11 @@ function fetch_item_instance_relationship_rs($item_id, $instance_no = NULL, $rel
 			$query .= "AND iir.related_instance_no = $instance_no";
 		}
 	}
-	
-	$query .= " ORDER BY 1, 2 ASC";
+
+	$query .= " ORDER BY ii.item_id, ii.instance_no ASC";
 	
 	$result = db_query ( $query );
-	if ($result && db_num_rows ( $result ) > 0)
-		return $result;
-	else
-		return FALSE;
+	return db_result_or_false($result);
 }
 
 function fetch_item_instance_relationship_r($item_id, $instance_no = NULL, $related_mode = RELATED_CHILDREN_MODE) {
@@ -360,6 +296,7 @@ function fetch_available_item_parents($HTTP_VARS, $item_r, $filter = null, $incl
 	if (is_null($filter)) {
 		// Fetch every item.
 		$items_rs = fetch_item_listing_rs(null, null, 'title', 'asc');
+
 	} elseif ($filter == '%parent_only%') {
 		// Fetch parent items only.
 		foreach ($current_parents as $parent) {
@@ -368,6 +305,7 @@ function fetch_available_item_parents($HTTP_VARS, $item_r, $filter = null, $incl
 			$items[] = $item;
 		}
 		return $items;
+
     } else {
         // Filter items.
         $items_rs = fetch_item_listing_rs(array('title' => $filter, 'title_match' => 'partial'), array(), 'title', 'asc');
@@ -415,12 +353,7 @@ function is_exists_item_instance_relationship($item_id, $instance_no) {
 				instance_no = $instance_no";
 	
 	$result = db_query ( $query );
-	if ($result && db_num_rows ( $result ) > 0) {
-		db_free_result ( $result );
-		return TRUE;
-	} else {
-		return FALSE;
-	}
+	return db_result_has_rows($result);
 }
 
 /**
@@ -442,12 +375,7 @@ function is_exists_related_item_instance_relationship($item_id, $instance_no, $p
 	}
 	
 	$result = db_query ( $query );
-	if ($result && db_num_rows ( $result ) > 0) {
-		db_free_result ( $result );
-		return TRUE;
-	} else {
-		return FALSE;
-	}
+	return db_result_has_rows($result);
 }
 
 //
@@ -460,24 +388,14 @@ function fetch_item_instance_r($item_id, $instance_no) {
 			WHERE i.id = ii.item_id AND i.id ='" . $item_id . "' AND ii.instance_no = '" . $instance_no . "'";
 	
 	$result = db_query ( $query );
-	if ($result && db_num_rows ( $result ) > 0) {
-		$found = db_fetch_assoc ( $result );
-		db_free_result ( $result );
-		return $found;
-	} else
-		return FALSE;
+	return db_result_single_row($result);
 }
 
 function fetch_item_r($item_id) {
 	$query = "SELECT id as item_id, title, s_item_type FROM item WHERE id = '" . $item_id . "'";
 	
 	$result = db_query ( $query );
-	if ($result && db_num_rows ( $result ) > 0) {
-		$found = db_fetch_assoc ( $result );
-		db_free_result ( $result );
-		return $found;
-	} else
-		return FALSE;
+	return db_result_single_row($result);
 }
 
 //
@@ -495,12 +413,7 @@ function fetch_item_title($item_id) {
 	// Only load previous record if edit.
 	$query = "SELECT title FROM item WHERE id = '" . $item_id . "'";
 	$result = db_query ( $query );
-	if ($result && db_num_rows ( $result ) > 0) {
-		$found = db_fetch_assoc ( $result );
-		db_free_result ( $result );
-		return $found ['title'];
-	} else
-		return FALSE;
+	return db_result_single_lookup($result, 'title');
 }
 
 //
@@ -510,12 +423,7 @@ function fetch_item_type($item_id) {
 	// Only load previous record if edit.
 	$query = "SELECT s_item_type FROM item WHERE id = '" . $item_id . "'";
 	$result = db_query ( $query );
-	if ($result && db_num_rows ( $result ) > 0) {
-		$found = db_fetch_assoc ( $result );
-		db_free_result ( $result );
-		return $found ['s_item_type'];
-	} else
-		return FALSE;
+	return db_result_single_lookup($result, 's_item_type');
 }
 
 /**
@@ -536,12 +444,7 @@ function is_exists_title($title, $s_item_type, $owner_id = NULL) {
 	}
 	
 	$result = db_query ( $query );
-	if ($result && db_num_rows ( $result ) > 0) {
-		db_free_result ( $result );
-		return TRUE;
-	} else {
-		return FALSE;
-	}
+	return db_result_has_rows($result);
 }
 
 /**
@@ -562,38 +465,20 @@ function is_exists_item_instance($item_id, $instance_no = NULL) {
 	$query .= " LIMIT 0,1";
 	
 	$result = db_query ( $query );
-	if ($result && db_num_rows ( $result ) > 0) {
-		db_free_result ( $result );
-		return TRUE;
-	}
-	
-	//else
-	return FALSE;
+	return db_result_has_rows($result);
 }
 
 function is_exists_item_instance_with_owner($owner_id) {
 	$query = "SELECT 'x' FROM item_instance WHERE owner_id = '$owner_id'";
 	$result = db_query ( $query );
-	if ($result && db_num_rows ( $result ) > 0) {
-		db_free_result ( $result );
-		return TRUE;
-	}
-	
-	//else
-	return FALSE;
+	return db_result_has_rows($result);
 }
 
 function is_exists_item_instance_with_owner_and_status($item_id, $s_status_type, $owner_id) {
 	$query = "SELECT 'x' FROM item_instance WHERE item_id = '$item_id' AND owner_id = '$owner_id' AND s_status_type = '$s_status_type'";
 	
 	$result = db_query ( $query );
-	if ($result && db_num_rows ( $result ) > 0) {
-		db_free_result ( $result );
-		return TRUE;
-	}
-	
-	//else
-	return FALSE;
+	return db_result_has_rows($result);
 }
 
 /**
@@ -605,13 +490,7 @@ function is_exists_item($item_id) {
 	$query = "SELECT 'x' FROM item WHERE id = '$item_id'";
 	
 	$result = db_query ( $query );
-	if ($result && db_num_rows ( $result ) > 0) {
-		db_free_result ( $result );
-		return TRUE;
-	}
-	
-	//else
-	return FALSE;
+	return db_result_has_rows($result);
 }
 
 /**
@@ -623,15 +502,7 @@ function fetch_max_instance_no($item_id) {
 	$query = "SELECT MAX(instance_no) as instance_no FROM item_instance WHERE item_id = $item_id";
 	
 	$result = db_query ( $query );
-	if ($result && db_num_rows ( $result ) > 0) {
-		$found = db_fetch_assoc ( $result );
-		db_free_result ( $result );
-		if ($found !== FALSE)
-			return $found ['instance_no'];
-	}
-	
-	//else
-	return FALSE;
+	return db_result_single_lookup($result, 'instance_no');
 }
 
 /**
@@ -675,15 +546,7 @@ function fetch_item_listing_cnt($HTTP_VARS, $column_display_config_rs = NULL) {
 	
 
 	$result = db_query ( $query );
-	if ($result && db_num_rows ( $result ) > 0) {
-		$found = db_fetch_assoc ( $result );
-		db_free_result ( $result );
-		if ($found !== FALSE)
-			return $found ['count'];
-	}
-	
-	//else
-	return FALSE;
+	return db_result_single_lookup($result, 'count');
 }
 
 /**
@@ -797,10 +660,7 @@ function fetch_item_listing_rs($HTTP_VARS, $column_display_config_rs, $order_by,
 	
 
 	$result = db_query ( $query );
-	if ($result && db_num_rows ( $result ) > 0)
-		return $result;
-	else
-		return FALSE;
+	return db_result_or_false($result);
 }
 
 /**
@@ -1236,23 +1096,12 @@ function delete_item($item_id) {
 */
 function delete_item_cascaded($item_id) {
 	if (db_query ( "LOCK TABLES item WRITE, item_attribute WRITE, item_instance WRITE" )) {
-		if (delete_item_attributes ( $item_id, NULL, NULL, NULL )) {
-			if (delete_item ( $item_id )) {
-				// Can't forget to unlock table.
-				db_query ( "UNLOCK TABLES" );
-				return TRUE;
-			} else {
-				// Can't forget to unlock table.
-				db_query ( "UNLOCK TABLES" );
-				
-				return FALSE;
-			}
-		} else {
-			// Can't forget to unlock table.
-			db_query ( "UNLOCK TABLES" );
-			
-			return FALSE;
-		}
+		$rc = FALSE;
+		if (delete_item_attributes ( $item_id, NULL, NULL, NULL ))
+			$rc = !!delete_item ( $item_id );
+		// Can't forget to unlock table.
+		db_query( "UNLOCK TABLES" );
+		return $rc;
 	} else {
 		opendb_logger ( OPENDB_LOG_ERROR, __FILE__, __FUNCTION__, db_error (), array (
 				$item_id ) );
@@ -1455,29 +1304,29 @@ function update_item_instance_owner($item_id, $instance_no, $old_owner_id, $owne
 // Delete item and return boolean indicating success or failure.
 //
 function delete_item_instance($item_id, $instance_no) {
-	// remove all child related item instance relationships only - not the actual instances themselves.
-	delete_item_instance_relationships ( $item_r ['item_id'], $item_r ['instance_no'] );
+    // remove all child related item instance relationships only - not the actual instances themselves.
+    delete_item_instance_relationships ( $item_id, $instance_no );
 	
-	if (! is_exists_related_item_instance_relationship ( $item_r ['item_id'], $item_r ['instance_no'] )) {
-		$query = "DELETE FROM item_instance WHERE item_id = '" . $item_id . "' AND instance_no = '$instance_no'";
-		$delete = db_query ( $query );
-		if (db_affected_rows () > 0) {
-			opendb_logger ( OPENDB_LOG_ERROR, __FILE__, __FUNCTION__, db_error (), array (
+    if (! is_exists_related_item_instance_relationship ( $item_id, $instance_no )) {
+	$query = "DELETE FROM item_instance WHERE item_id = '" . $item_id . "' AND instance_no = '".$instance_no."'";
+	$delete = db_query ( $query );
+	if (db_affected_rows () > 0) {
+	    opendb_logger ( OPENDB_LOG_ERROR, __FILE__, __FUNCTION__, db_error (), array (
 					$item_id,
 					$instance_no ) );
-			return TRUE;
-		} else {
-			opendb_logger ( OPENDB_LOG_ERROR, __FILE__, __FUNCTION__, db_error (), array (
-					$item_id,
-					$instance_no ) );
-			return FALSE;
-		}
+	    return TRUE;
 	} else {
-		opendb_logger ( OPENDB_LOG_ERROR, __FILE__, __FUNCTION__, 'Instance is referenced in at least one item instance relationship', array (
+	    opendb_logger ( OPENDB_LOG_ERROR, __FILE__, __FUNCTION__, db_error (), array (
+					$item_id,
+					$instance_no ) );
+	    return FALSE;
+	}
+    } else {
+	opendb_logger ( OPENDB_LOG_ERROR, __FILE__, __FUNCTION__, 'Instance is referenced in at least one item instance relationship', array (
 				$item_id,
 				$instance_no ) );
-		return FALSE;
-	}
+	return FALSE;
+    }
 }
 
 function insert_item_instance_relationships($item_id, $related_item_id, $related_instance_no) {
@@ -1573,10 +1422,10 @@ function copy_related_item_instance_relationships($item_id, $instance_no) {
 
 function delete_related_item_instance_relationship($item_id, $instance_no, $parent_item_id, $parent_instance_no) {
 	$query = "DELETE FROM item_instance_relationship 
-			WHERE related_item_id = '" . $item_id . "' AND 
-				related_instance_no = $instance_no AND
-				item_id = $parent_item_id AND
-				instance_no = $parent_instance_no";
+	    WHERE related_item_id = '" . $item_id . "' AND 
+	    related_instance_no = $instance_no AND
+	    item_id = $parent_item_id AND
+	    instance_no = $parent_instance_no";
 	
 	$delete = db_query ( $query );
 	if (db_affected_rows () > 0) {
