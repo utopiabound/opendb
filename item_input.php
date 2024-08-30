@@ -44,7 +44,7 @@ include_once("./lib/TitleMask.class.php");
 include_once("./lib/HTML_Listing.class.php");
 
 function get_related_item_search_script() {
-	$script = "$(document).ready(function() {
+    $script = "$(document).ready(function() {
     $('#parent_item_loading').hide();
 
     $('#parent_item_filter').change(function() {
@@ -468,45 +468,45 @@ function get_site_item_input_data($op, $item_r, $HTTP_VARS) {
 // This function will calculate a field input_field value,
 // based on $HTTP_VARS, $op and $indexes (Used for site operations)
 function get_field_value($op, $item_r, $s_attribute_type, $order_no, $s_field_type, $attribute_val, &$HTTP_VARS) {
-	if (is_not_empty_array($HTTP_VARS)) { // Lets try to get field value, from HTTP
- 		$fieldname = get_field_name($s_attribute_type, $order_no);
+    if (is_not_empty_array($HTTP_VARS)) { // Lets try to get field value, from HTTP
+	$fieldname = get_field_name($s_attribute_type, $order_no);
 
-		// refresh operation!
-		if (isset($HTTP_VARS[$fieldname]) && !is_array($HTTP_VARS[$fieldname])) {
-			if (preg_match("/new([0-9]+)/", $HTTP_VARS[$fieldname], $matches) && isset($HTTP_VARS[$fieldname . '_' . $matches[0]])) {
-				$HTTP_VARS[$fieldname] = $HTTP_VARS[$fieldname . '_' . $matches[0]];
-			} else if ($HTTP_VARS[$fieldname] == 'old') {
-				// make sure this is a refresh value and not just a field with the value 'old'
-				if (isset($HTTP_VARS[$fieldname . '_new0'])) {
-					// Using $item_r value instead.
-					unset($HTTP_VARS[$fieldname]);
-				}
-			}
+	// refresh operation!
+	if (isset($HTTP_VARS[$fieldname]) && !is_array($HTTP_VARS[$fieldname])) {
+	    if (preg_match("/new([0-9]+)/", $HTTP_VARS[$fieldname], $matches) && isset($HTTP_VARS[$fieldname . '_' . $matches[0]])) {
+		$HTTP_VARS[$fieldname] = $HTTP_VARS[$fieldname . '_' . $matches[0]];
+	    } else if ($HTTP_VARS[$fieldname] == 'old') {
+		// make sure this is a refresh value and not just a field with the value 'old'
+		if (isset($HTTP_VARS[$fieldname . '_new0'])) {
+		    // Using $item_r value instead.
+		    unset($HTTP_VARS[$fieldname]);
 		}
-
-		// this is a kludge for when a new fails
-		if (!isset($HTTP_VARS[$fieldname]) && $s_field_type == 'TITLE') {
-			$fieldname = 'title';
-		}
-
-		// If $HTTP_VARS[$fieldname] is set, we have probably come back to
-		// edit form, after a failed insert or update.
-		if (isset($HTTP_VARS[$fieldname])) {
-			// Is it an upload operation - There is not much we can do in the case of $_FILES, as they
-			// cannot be cached and passed into next request.  A user would have to re-upload the file.
-			if (is_array($_FILES) && is_array($_FILES[$fieldname]))
-				return NULL;
-			else
-				// normal field
-				return $HTTP_VARS[$fieldname];
-		} else if ($op == 'new') {
-            return get_field_default_value($s_attribute_type);
-		} else if ($op == 'site' && !isset($HTTP_VARS[$fieldname])) {
-            return get_field_default_value($s_attribute_type);
-        }
+	    }
 	}
 
-	return get_old_field_value($item_r, $s_field_type, $attribute_val);
+	// this is a kludge for when a new fails
+	if (!isset($HTTP_VARS[$fieldname]) && $s_field_type == 'TITLE') {
+	    $fieldname = 'title';
+	}
+
+	// If $HTTP_VARS[$fieldname] is set, we have probably come back to
+	// edit form, after a failed insert or update.
+	if (isset($HTTP_VARS[$fieldname])) {
+	    // Is it an upload operation - There is not much we can do in the case of $_FILES, as they
+	    // cannot be cached and passed into next request.  A user would have to re-upload the file.
+	    if (is_array($_FILES) && isset($_FILES[$fieldname]) && is_array($_FILES[$fieldname]))
+		return NULL;
+	    else
+		// normal field
+		return $HTTP_VARS[$fieldname];
+	} else if ($op == 'new') {
+            return get_field_default_value($s_attribute_type);
+	} else if ($op == 'site' && !isset($HTTP_VARS[$fieldname])) {
+            return get_field_default_value($s_attribute_type);
+        }
+    }
+
+    return get_old_field_value($item_r, $s_field_type, $attribute_val);
 }
 
 function get_old_field_value($item_r, $s_field_type, $attribute_val) {
@@ -1496,167 +1496,167 @@ function perform_site_process(&$item_r, &$status_type_r, &$HTTP_VARS, &$footer_l
 // MAIN PROCESS
 // *****************************************************************************
 if (is_site_enabled()) {
-	@set_time_limit(600);
+    @set_time_limit(600);
 
-	if (is_opendb_valid_session()) {
-		if (is_user_granted_permission(PERM_ITEM_OWNER) || is_user_granted_permission(PERM_ITEM_ADMIN)) {
-			if (empty($HTTP_VARS['ajax_op'])) {
-				// For a $op == ('site' OR 'site-search' OR 'site-add') where an item is actually defined,
-				// it is really a 'refresh' site operation.
-				if ( $HTTP_VARS['op'] == 'new' ||
-					 $HTTP_VARS['op'] == 'insert' ||
-					 ( ( $HTTP_VARS['op'] == 'site-search' ||
-						 $HTTP_VARS['op'] == 'site-add' ||
-						 $HTTP_VARS['op'] == 'site-refresh' ||
-						 $HTTP_VARS['op'] == 'site') &&
-					   !is_exists_item($HTTP_VARS['item_id'] ?? NULL))) {
+    if (is_opendb_valid_session()) {
+	if (is_user_granted_permission(PERM_ITEM_OWNER) || is_user_granted_permission(PERM_ITEM_ADMIN)) {
+	    if (empty($HTTP_VARS['ajax_op'])) {
+		// For a $op == ('site' OR 'site-search' OR 'site-add') where an item is actually defined,
+		// it is really a 'refresh' site operation.
+		if ( $HTTP_VARS['op'] == 'new' ||
+		     $HTTP_VARS['op'] == 'insert' ||
+		     ( ( $HTTP_VARS['op'] == 'site-search' ||
+			 $HTTP_VARS['op'] == 'site-add' ||
+			 $HTTP_VARS['op'] == 'site-refresh' ||
+			 $HTTP_VARS['op'] == 'site') &&
+		       !is_exists_item($HTTP_VARS['item_id'] ?? NULL))) {
 
-					if (strlen($HTTP_VARS['s_status_type'] ?? "") == 0) {
-						$status_attr_type_r = fetch_sfieldtype_item_attribute_type_r($HTTP_VARS['s_item_type'] ?? "", 'STATUSTYPE');
-						$HTTP_VARS['s_status_type'] = $HTTP_VARS[get_field_name($status_attr_type_r['s_attribute_type'], $status_attr_type_r['order_no'])] ?? "";
-					}
+		    if (strlen($HTTP_VARS['s_status_type'] ?? "") == 0) {
+			$status_attr_type_r = fetch_sfieldtype_item_attribute_type_r($HTTP_VARS['s_item_type'] ?? "", 'STATUSTYPE');
+			$HTTP_VARS['s_status_type'] = $HTTP_VARS[get_field_name($status_attr_type_r['s_attribute_type'], $status_attr_type_r['order_no'])] ?? "";
+		    }
 	
-					if (strlen($HTTP_VARS['s_status_type']) > 0) {
-						$status_type_r = fetch_status_type_r($HTTP_VARS['s_status_type']);
-					} else {
-						// Dummy array entry, as the s_status_type will be chosen in the edit form.
-						$status_type_r = array('borrow_ind' => 'Y', 's_status_type' => '');
-					}
+		    if (strlen($HTTP_VARS['s_status_type']) > 0) {
+			$status_type_r = fetch_status_type_r($HTTP_VARS['s_status_type']);
+		    } else {
+			// Dummy array entry, as the s_status_type will be chosen in the edit form.
+			$status_type_r = array('borrow_ind' => 'Y', 's_status_type' => '');
+		    }
 	
-					// where we are making a copy of an existing item
-					if (is_exists_item($HTTP_VARS['item_id'] ?? NULL)) {
-						$item_r = fetch_item_r($HTTP_VARS['item_id']);
-					} else {
-						$item_r = array('item_id' => NULL, 'title' => NULL, 's_item_type' => trim($HTTP_VARS['s_item_type'] ?? ""));
-					}
-	
-					$item_r['instance_no'] = NULL; // if a new copy / clone let insert process work out next instance no
-					$item_r['owner_id'] = ifempty($HTTP_VARS['owner_id'], get_opendb_session_var('user_id'));
-					$item_r['s_status_type'] = $status_type_r['s_status_type'];
-					$item_r['status_comment'] = NULL;
+		    // where we are making a copy of an existing item
+		    if (is_exists_item($HTTP_VARS['item_id'] ?? NULL)) {
+			$item_r = fetch_item_r($HTTP_VARS['item_id']);
+		    } else {
+			$item_r = array('item_id' => NULL, 'title' => NULL, 's_item_type' => trim($HTTP_VARS['s_item_type'] ?? ""));
+		    }
 
-				} else { //otherwise either a site refresh operation or an edit/update/delete
-	 				$item_r = fetch_item_instance_r($HTTP_VARS['item_id'], $HTTP_VARS['instance_no']);
-	
-					// a new copy should be for the current user
-					if ($HTTP_VARS['op'] == 'newinstance')
-						$item_r['owner_id'] = get_opendb_session_var('user_id');
-	
-					$status_type_r = fetch_status_type_r($item_r['s_status_type']);
-				}
-	
-				// Includes 'new' because we artificially construct an $item_r array.
-				if (is_not_empty_array($item_r)) {
-					// We need a valid $status_type_r as well at this point, and should not continue without it.
-					if (is_not_empty_array($status_type_r)) {
-						$footer_links_r = NULL;
-	
-						// construct single instance of this object to use throughout the script.
-						$titleMaskCfg = new TitleMask('item_display');
-	
-						switch ($HTTP_VARS['op']) {
-						case 'insert':
-							perform_insert_process($item_r, $status_type_r, $HTTP_VARS, $footer_links_r);
-							break;
-	
-						case 'delete':
-							perform_delete_process($item_r, $status_type_r, $HTTP_VARS, $footer_links_r);
-							break;
-	
-						case 'update':
-							perform_update_process($item_r, $status_type_r, $HTTP_VARS, $footer_links_r);
-							break;
-	
-						case 'newinstance':
-							perform_edit_process($item_r, $status_type_r, $HTTP_VARS, $footer_links_r);
-							break;
-	
-						case 'clone_item':
-							perform_cloneitem_process($item_r, $status_type_r, $HTTP_VARS, $footer_links_r);
-							break;
-	
-						case 'new':
-							perform_new_process($item_r, $status_type_r, $HTTP_VARS, $footer_links_r);
-							break;
-	
-						case 'edit':
-							perform_edit_process($item_r, $status_type_r, $HTTP_VARS, $footer_links_r);
-							break;
-	
-	                    case 'delete-relation':
-	                        perform_delete_relation_process($item_r, $status_type_r, $HTTP_VARS, $footer_links_r);
-	                        break;
-	
-						case 'site-add':
-							handle_site_add_or_refresh(NULL, $status_type_r, $HTTP_VARS, $footer_links_r);
-							break;
-	
-						case 'site-refresh':
-							handle_site_add_or_refresh($item_r, $status_type_r, $HTTP_VARS, $footer_links_r);
-							break;
-	
-						case 'site-search':
-						case 'site':
-							perform_site_process($item_r, $status_type_r, $HTTP_VARS, $footer_links_r);
-							break;
-	
-						default:
-							echo _theme_header(get_opendb_lang_var('operation_not_available'));
-							echo format_error_block(get_opendb_lang_var('operation_not_available'));
-						}
-					} else { //if(is_not_empty_array($status_type_r))
-	 					$page_title = get_opendb_lang_var('invalid_s_status_type', 's_status_type', ifempty($item_r['s_status_type'], $HTTP_VARS['s_status_type']));
-						echo _theme_header($page_title);
-						echo format_error_block($page_title);
-					}
-				} else { //if(is_not_empty_array($item_r))
-	 				echo _theme_header(get_opendb_lang_var('item_not_found'));
-					echo format_error_block(get_opendb_lang_var('item_not_found'));
-				}
-	
-				if (is_opendb_session_var('listing_url_vars')) {
-					$footer_links_r[] = array('url' => "listings.php?" . get_url_string(get_opendb_session_var('listing_url_vars')), 'text' => get_opendb_lang_var('back_to_listing'));
-				}
-	
-				echo format_footer_links($footer_links_r);
-				echo _theme_footer();
-			} else {
-				switch ($HTTP_VARS['ajax_op']) {
-					case 'possible-parents':
-						// Get HTML select list of possible item parents.
-						if (is_user_granted_permission(PERM_ITEM_OWNER) || is_user_granted_permission(PERM_ITEM_ADMIN)) {
-							echo json_encode(
-									array('select' => format_item_parents_select(
-											$HTTP_VARS, fetch_item_r($HTTP_VARS['item_id']), $HTTP_VARS['parent_item_filter'])));
-						}
-						break;
-					default:
-						// invalid operation.
-						echo json_encode(array('error' => get_opendb_lang_var('operation_not_available')));
-						break;
-				}
-			}
-		} else {
-			if (empty($HTTP_VARS['ajax_op'])) {
-				opendb_not_authorised_page(array(PERM_ITEM_OWNER, PERM_ITEM_ADMIN), $HTTP_VARS);
-			} else {
-				echo json_encode(array('error' => get_opendb_lang_var('not_authorized_to_page')));
-			}
+		    $item_r['instance_no'] = NULL; // if a new copy / clone let insert process work out next instance no
+		    $item_r['owner_id'] = ifempty($HTTP_VARS['owner_id'], get_opendb_session_var('user_id'));
+		    $item_r['s_status_type'] = $status_type_r['s_status_type'];
+		    $item_r['status_comment'] = NULL;
+
+		} else { //otherwise either a site refresh operation or an edit/update/delete
+		    $item_r = fetch_item_instance_r($HTTP_VARS['item_id'], $HTTP_VARS['instance_no']);
+
+		    // a new copy should be for the current user
+		    if ($HTTP_VARS['op'] == 'newinstance')
+			$item_r['owner_id'] = get_opendb_session_var('user_id');
+
+		    $status_type_r = fetch_status_type_r($item_r['s_status_type']);
 		}
+
+		// Includes 'new' because we artificially construct an $item_r array.
+		if (is_not_empty_array($item_r)) {
+		    // We need a valid $status_type_r as well at this point, and should not continue without it.
+		    if (is_not_empty_array($status_type_r)) {
+			$footer_links_r = NULL;
+
+			// construct single instance of this object to use throughout the script.
+			$titleMaskCfg = new TitleMask('item_display');
+
+			switch ($HTTP_VARS['op']) {
+			case 'insert':
+			    perform_insert_process($item_r, $status_type_r, $HTTP_VARS, $footer_links_r);
+			    break;
+
+			case 'delete':
+			    perform_delete_process($item_r, $status_type_r, $HTTP_VARS, $footer_links_r);
+			    break;
+
+			case 'update':
+			    perform_update_process($item_r, $status_type_r, $HTTP_VARS, $footer_links_r);
+			    break;
+
+			case 'newinstance':
+			    perform_edit_process($item_r, $status_type_r, $HTTP_VARS, $footer_links_r);
+			    break;
+
+			case 'clone_item':
+			    perform_cloneitem_process($item_r, $status_type_r, $HTTP_VARS, $footer_links_r);
+			    break;
+
+			case 'new':
+			    perform_new_process($item_r, $status_type_r, $HTTP_VARS, $footer_links_r);
+			    break;
+
+			case 'edit':
+			    perform_edit_process($item_r, $status_type_r, $HTTP_VARS, $footer_links_r);
+			    break;
+
+			case 'delete-relation':
+			    perform_delete_relation_process($item_r, $status_type_r, $HTTP_VARS, $footer_links_r);
+			    break;
+
+			case 'site-add':
+			    handle_site_add_or_refresh(NULL, $status_type_r, $HTTP_VARS, $footer_links_r);
+			    break;
+
+			case 'site-refresh':
+			    handle_site_add_or_refresh($item_r, $status_type_r, $HTTP_VARS, $footer_links_r);
+			    break;
+
+			case 'site-search':
+			case 'site':
+			    perform_site_process($item_r, $status_type_r, $HTTP_VARS, $footer_links_r);
+			    break;
+
+			default:
+			    echo _theme_header(get_opendb_lang_var('operation_not_available'));
+			    echo format_error_block(get_opendb_lang_var('operation_not_available'));
+			}
+		    } else { //if(is_not_empty_array($status_type_r))
+			$page_title = get_opendb_lang_var('invalid_s_status_type', 's_status_type', ifempty($item_r['s_status_type'], $HTTP_VARS['s_status_type']));
+			echo _theme_header($page_title);
+			echo format_error_block($page_title);
+		    }
+		} else { //if(is_not_empty_array($item_r))
+		    echo _theme_header(get_opendb_lang_var('item_not_found'));
+		    echo format_error_block(get_opendb_lang_var('item_not_found'));
+		}
+
+		if (is_opendb_session_var('listing_url_vars')) {
+		    $footer_links_r[] = array('url' => "listings.php?" . get_url_string(get_opendb_session_var('listing_url_vars')), 'text' => get_opendb_lang_var('back_to_listing'));
+		}
+
+		echo format_footer_links($footer_links_r);
+		echo _theme_footer();
+	    } else {
+		switch ($HTTP_VARS['ajax_op']) {
+		case 'possible-parents':
+		    // Get HTML select list of possible item parents.
+		    if (is_user_granted_permission(PERM_ITEM_OWNER) || is_user_granted_permission(PERM_ITEM_ADMIN)) {
+			echo json_encode(
+					 array('select' => format_item_parents_select(
+										      $HTTP_VARS, fetch_item_r($HTTP_VARS['item_id']), $HTTP_VARS['parent_item_filter'])));
+		    }
+		    break;
+		default:
+		    // invalid operation.
+		    echo json_encode(array('error' => get_opendb_lang_var('operation_not_available')));
+		    break;
+		}
+	    }
 	} else {
-		if (empty($HTTP_VARS['ajax_op'])) {
-			// invalid login, so login instead.
-			redirect_login($PHP_SELF, $HTTP_VARS);
-		} else {
-			echo json_encode(array('error' => get_opendb_lang_var('login_failure')));
-		}
+	    if (empty($HTTP_VARS['ajax_op'])) {
+		opendb_not_authorised_page(array(PERM_ITEM_OWNER, PERM_ITEM_ADMIN), $HTTP_VARS);
+	    } else {
+		echo json_encode(array('error' => get_opendb_lang_var('not_authorized_to_page')));
+	    }
 	}
-} else { //if(is_site_enabled())
+    } else {
 	if (empty($HTTP_VARS['ajax_op'])) {
-		opendb_site_disabled();
+	    // invalid login, so login instead.
+	    redirect_login($PHP_SELF, $HTTP_VARS);
 	} else {
-		echo json_encode(array('error' => get_opendb_lang_var('site_is_disabled')));
+	    echo json_encode(array('error' => get_opendb_lang_var('login_failure')));
 	}
+    }
+} else { //if(is_site_enabled())
+    if (empty($HTTP_VARS['ajax_op'])) {
+	opendb_site_disabled();
+    } else {
+	echo json_encode(array('error' => get_opendb_lang_var('site_is_disabled')));
+    }
 }
 
 // Cleanup after begin.inc.php

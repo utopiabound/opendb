@@ -28,7 +28,7 @@
 include_once("./lib/SitePlugin.class.php");
 
 class gbooks extends SitePlugin {
-    var $base_url='https://www.googleapis.com/books/v1/volumes';
+    private $base_url = "https://www.googleapis.com/books/v1/volumes";
 	
     function __construct($site_type) {
 	parent::__construct($site_type);
@@ -37,8 +37,8 @@ class gbooks extends SitePlugin {
     function queryListing($page_no, $items_per_page, $offset, $s_item_type, $search_vars_r) {
 	// standard block of code to cater for refresh option, where item already has
 	// reference to site item unique ID.
-	if (isset($search_vars_r['gbooks_id']) && strlen($search_vars_r['gbooks_id']) > 0) {
-	    $this->addListingRow(NULL, NULL, NULL, array('gbooks_id' => $search_vars_r['gbooks_id']));
+	if (isset($search_vars_r["gbooks_id"]) && strlen($search_vars_r["gbooks_id"]) > 0) {
+	    $this->addListingRow(NULL, NULL, NULL, array("gbooks_id" => $search_vars_r["gbooks_id"]));
 	    return TRUE;
 	}
 
@@ -89,72 +89,73 @@ class gbooks extends SitePlugin {
 	    }
 	    return TRUE;
 	}
+	return FALSE;
+    }
 
-	function queryItem($search_attributes_r, $s_item_type) {
-	    $result = json_decode($this->fetchURI($this->base_url . '/' . $search_attributes_r['gbooks_id'],true),true);
-	    //echo('GBOOKS debug: '.print_r($result,true).'<br/>');
+    function queryItem($search_attributes_r, $s_item_type) {
+	$result = json_decode($this->fetchURI($this->base_url . '/' . $search_attributes_r["gbooks_id"], true), true);
+	//echo('GBOOKS debug: '.print_r($result,true).'<br/>');
 
-		// make sure we actually got data
-		if(!isset($result['id'])) {
-			return FALSE;
-		}
-
-		$vol = $result['volumeInfo'];
-
-		$title ='';
-		isset($vol['title'])	&& $title = $vol['title'];
-		$this->addItemAttribute('title', $title);
-		isset($vol['subtitle'])	&& $this->addItemAttribute('alt_title', $title . ' - '. $vol['subtitle']);
-
-		// only year is allowd in the DB - google sometimes knows the exact date in the format YYYY-MM-DD
-		isset($vol['publishedDate']) && $this->addItemAttribute('pub_year', substr($vol['publishedDate'],0,4));
-
-		isset($vol['authors']) && $this->addItemAttribute('author', $vol['authors']);
-
-		// dummy file name ending appended to the image since opendb requires ending
-		if (isset($vol['imageLinks']))
-			foreach(['extraLarge', 'large', 'medium', 'small', 'thumbnail'] as $size)
-				if (isset($vol['imageLinks'][$size])) {
-					$cover_image_url = $vol['imageLinks'][$size];
-					$cover_image_url = preg_replace("!edge=\w+&!", "", $cover_image_url);
-					$cover_image_url = preg_replace("!zoom=\d+&!", "zoom=1&", $cover_image_url);
-					$cover_image_url = preg_replace("!imgtk=[\w-]+&!", "", $cover_image_url);
-					$this->addItemAttribute('imageurl', $cover_image_url.'&type.jpg');
-					break;
-				}
-
-		if(isset($vol['industryIdentifiers'])){
-			foreach($vol['industryIdentifiers'] as $iid){
-				$iid['type'] == "ISBN_10" && $this->addItemAttribute('isbn', $iid['identifier']);
-				$iid['type'] == "ISBN_13" && $this->addItemAttribute('isbn13', $iid['identifier']);
-			}
-		}
-
-		if (isset($vol['saleInfo']['retailPrice']))
-			$this->addItemAttribute('listprice', $vol['saleInfo']['retailPrice']['amount']);
-		elseif (isset($vol['saleInfo']['listPrice']))
-			$this->addItemAttribute('listprice', $vol['saleInfo']['listPrice']['amount']);
-
-		if ($vol['saleInfo']['isEbook'])
-			$this->addItemAttribute('binding', 'eBook');
-
-		// @@ - FIXME
-		isset($vol['categories']) && $this->addItemAttribute('genre', $vol['categories']);
-
-		isset($vol['description']) && $this->addItemAttribute('synopsis', $vol['description']);
-
-		isset($vol['publisher']) && $this->addItemAttribute('publisher', $vol['publisher']);
-
-		isset($vol['pageCount']) && $this->addItemAttribute('no_pages', $vol['pageCount']);
-
-		$lang_replace=array('!en!i' => 'english',
-							'!fr!i' => 'french',
-							'!da!i' => 'danish'
-							);
-		isset($vol['language']) && $this->addItemAttribute('text_lang', preg_replace(array_keys($lang_replace),array_values($lang_replace),$vol['language']));
-
-		return TRUE;
+	// make sure we actually got data
+	if(!isset($result['id'])) {
+	    return FALSE;
 	}
+
+	$vol = $result['volumeInfo'];
+
+	$title ='';
+	isset($vol['title'])	&& $title = $vol['title'];
+	$this->addItemAttribute('title', $title);
+	isset($vol['subtitle'])	&& $this->addItemAttribute('alt_title', $title . ' - '. $vol['subtitle']);
+
+	// only year is allowd in the DB - google sometimes knows the exact date in the format YYYY-MM-DD
+	isset($vol['publishedDate']) && $this->addItemAttribute('pub_year', substr($vol['publishedDate'],0,4));
+
+	isset($vol['authors']) && $this->addItemAttribute('author', $vol['authors']);
+
+	// dummy file name ending appended to the image since opendb requires ending
+	if (isset($vol['imageLinks']))
+	    foreach(['extraLarge', 'large', 'medium', 'small', 'thumbnail'] as $size)
+		if (isset($vol['imageLinks'][$size])) {
+		    $cover_image_url = $vol['imageLinks'][$size];
+		    $cover_image_url = preg_replace("!edge=\w+&!", "", $cover_image_url);
+		    $cover_image_url = preg_replace("!zoom=\d+&!", "zoom=1&", $cover_image_url);
+		    $cover_image_url = preg_replace("!imgtk=[\w-]+&!", "", $cover_image_url);
+		    $this->addItemAttribute('imageurl', $cover_image_url.'&type.jpg');
+		    break;
+		}
+
+	if(isset($vol['industryIdentifiers'])){
+	    foreach($vol['industryIdentifiers'] as $iid){
+		$iid['type'] == "ISBN_10" && $this->addItemAttribute('isbn', $iid['identifier']);
+		$iid['type'] == "ISBN_13" && $this->addItemAttribute('isbn13', $iid['identifier']);
+	    }
+	}
+
+	if (isset($vol['saleInfo']['retailPrice']))
+	    $this->addItemAttribute('listprice', $vol['saleInfo']['retailPrice']['amount']);
+	elseif (isset($vol['saleInfo']['listPrice']))
+	    $this->addItemAttribute('listprice', $vol['saleInfo']['listPrice']['amount']);
+
+	if ($vol['saleInfo']['isEbook'])
+	    $this->addItemAttribute('binding', 'eBook');
+
+	// @@ - FIXME
+	isset($vol['categories']) && $this->addItemAttribute('genre', $vol['categories']);
+
+	isset($vol['description']) && $this->addItemAttribute('synopsis', $vol['description']);
+
+	isset($vol['publisher']) && $this->addItemAttribute('publisher', $vol['publisher']);
+
+	isset($vol['pageCount']) && $this->addItemAttribute('no_pages', $vol['pageCount']);
+
+	$lang_replace=array('!en!i' => 'english',
+			    '!fr!i' => 'french',
+			    '!da!i' => 'danish'
+			    );
+	isset($vol['language']) && $this->addItemAttribute('text_lang', preg_replace(array_keys($lang_replace),array_values($lang_replace),$vol['language']));
+
+	return TRUE;
     }
 }
 

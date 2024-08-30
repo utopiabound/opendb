@@ -144,31 +144,30 @@ function is_exists_site_plugin($site_type, $check_classname = TRUE) {
 * Returns site_plugin record from table for site_type
 */
 function fetch_site_plugin_r($site_type) {
-	$query = "SELECT site_type, classname, order_no, title, image, description, external_url, items_per_page, more_info_url " . "FROM s_site_plugin " . "WHERE site_type = '" . $site_type . "'";
+    $query = "SELECT site_type, classname, order_no, title, image, description, external_url, items_per_page, more_info_url " . "FROM s_site_plugin " . "WHERE site_type = '" . $site_type . "'";
 	
-	$result = db_query ( $query );
-	if ($result && db_num_rows ( $result ) > 0) {
-		$site_plugin_r = db_fetch_assoc ( $result );
-		db_free_result ( $result );
-		
-		return $site_plugin_r;
-	} else
-		return FALSE;
+    $result = db_query ( $query );
+    if ($result && db_num_rows ( $result ) > 0) {
+	$site_plugin_r = db_fetch_assoc ( $result );
+	db_free_result ( $result );
+
+	return $site_plugin_r;
+    }
+    return FALSE;
 }
 
 function fetch_site_plugin_classname($site_type) {
-	$query = "SELECT classname " . "FROM s_site_plugin " . "WHERE site_type = '" . $site_type . "'";
+    $query = "SELECT classname FROM s_site_plugin WHERE site_type = '" . $site_type . "'";
 	
-	$result = db_query ( $query );
-	if ($result && db_num_rows ( $result ) > 0) {
-		$site_plugin_r = db_fetch_assoc ( $result );
-		db_free_result ( $result );
-		
-		return $site_plugin_r ['classname'];
-	}
+    $result = db_query ( $query );
+    if ($result && db_num_rows ( $result ) > 0) {
+	$site_plugin_r = db_fetch_assoc ( $result );
+	db_free_result ( $result );
+
+	return $site_plugin_r ['classname'];
+    }
 	
-	//else
-	return FALSE;
+    return FALSE;
 }
 
 function get_site_plugin_list_r() {

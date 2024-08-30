@@ -208,50 +208,50 @@ class SitePlugin {
 	* to include any context information.
 	*/
 	function addListingRow($title, $cover_image_url, $comments, $attributes_r) {
-		$title = trim ( strip_tags ( $title ) );
-		$comments = trim ( strip_tags ( $comments ) );
-		$cover_image_url = trim ( strip_tags ( $cover_image_url ) );
+	    $title = trim ( strip_tags ( $title ) );
+	    $comments = trim ( strip_tags ( $comments ) );
+	    $cover_image_url = trim ( strip_tags ( $cover_image_url ) );
 		
-		if (is_array ( $attributes_r )) {
-			// lets make sure we don't already have a row with the same $attributes_r set.
-			if (is_array ( $this->_item_list_rs )) {
-				for($i = 0; $i < count ( $this->_item_list_rs ); $i ++) {
-					if (is_array ( $this->_item_list_rs ['attributes'] )) {
-						$found = TRUE;
-						reset ( $attributes_r );
-						foreach ($attributes_r as $key => $value) {
-							// if not set, this is considered no match and do next for loop cycle
-							if (! isset ( $this->_item_list_rs ['attributes'] [$key] ) || $this->_item_list_rs ['attributes'] [$key] != $key) {
-								$found = FALSE;
-								break;
-							}
-						}
-						
-						if ($found) {
-							return FALSE;
-						}
-					}
+	    if (is_array ( $attributes_r )) {
+		// lets make sure we don't already have a row with the same $attributes_r set.
+		if (isset($this->_item_list_rs) && is_array($this->_item_list_rs)) {
+		    for ($i = 0; $i < count ( $this->_item_list_rs ); $i ++) {
+			if (is_array ( $this->_item_list_rs["attributes"] )) {
+			    $found = TRUE;
+			    reset ( $attributes_r );
+			    foreach ($attributes_r as $key => $value) {
+				// if not set, this is considered no match and do next for loop cycle
+				if (! isset( $this->_item_list_rs ['attributes'] [$key] ) ||
+				    $this->_item_list_rs ['attributes'] [$key] != $key)
+				{
+				    $found = FALSE;
+				    break;
 				}
+			    }
+				
+			    if ($found) {
+				return FALSE;
+			    }
 			}
-			
-			if (strlen ( $this->_more_info_url ) > 0) {
-				$more_info_url = $this->_titleMaskCfg->expand_mask ( $attributes_r, $this->_more_info_url );
-			}
-			
-			$opendb_link_url = get_url_string ( $this->_http_vars, $attributes_r );
-			
-			$this->_item_list_rs [] = array (
-					'title' => $title,
-					'cover_image_url' => trim ( $cover_image_url ),
-					'comments' => trim ( strip_tags ( str_replace ( '<br>', "\n", $comments ) ) ),
-					'more_info_url' => trim ( $more_info_url ),
-					'opendb_link_url' => trim ( $opendb_link_url ),
-					'attributes' => $attributes_r );
+		    }
 		}
-		// else ignore
-		
+			
+		if (strlen ( $this->_more_info_url ) > 0) {
+		    $more_info_url = $this->_titleMaskCfg->expand_mask ( $attributes_r, $this->_more_info_url );
+		}
 
-		return TRUE;
+		$opendb_link_url = get_url_string ( $this->_http_vars, $attributes_r );
+			
+		$this->_item_list_rs [] = array('title' => $title,
+						'cover_image_url' => trim ( $cover_image_url ),
+						'comments' => trim ( strip_tags ( str_replace ( '<br>', "\n", $comments ) ) ),
+						'more_info_url' => trim ( $more_info_url ),
+						'opendb_link_url' => trim ( $opendb_link_url ),
+						'attributes' => $attributes_r );
+	    }
+	    // else ignore
+
+	    return TRUE;
 	}
 
 	function isItemAttributeSet($attribute) {
@@ -557,7 +557,7 @@ class SitePlugin {
 			if ($this->queryListing ( $this->_page_no, $this->_items_per_page, $offset, $HTTP_VARS ['s_item_type'], $input_field_values_r )) {
 				// no need for this anymore
 				$this->_http_vars = NULL;
-				
+
 				// if a single item returned, we will populate the itemData at this point too
 				if ($this->getRowCount () == 1 && $this->isPreviousPage () === FALSE) {
 					$rowData = $this->getRowData ( 0 );
