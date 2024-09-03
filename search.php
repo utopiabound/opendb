@@ -144,7 +144,7 @@ if (is_site_enabled()) {
 
 				reset($category_type_rs);
 				foreach ($category_type_rs as $value => $display) {
-					$catTypeSelect .= "\n<option value=\"$value\">$display";
+					$catTypeSelect .= "\n<option value=\"$value\">$display</option>";
 				}
 				$catTypeSelect .= "</select>";
 
@@ -160,11 +160,11 @@ if (is_site_enabled()) {
 
 			if (@count($item_type_rs) > 1) {
 				$itemTypeSelect = "<select name=\"s_item_type\" id=\"search-itemtype\" onChange=\"populateList(this.options[this.options.selectedIndex].value, this.form.attribute_type, arrayOfAttributes, true, '------------- " . get_opendb_lang_var('all') . " -------------', false);\">"
-						. "\n<option value=\"\">-------------- " . get_opendb_lang_var('all') . " --------------";
+						. "\n<option value=\"\">-------------- " . get_opendb_lang_var('all') . " --------------</option>";
 
 				reset($item_type_rs);
 				foreach ($item_type_rs as $item_type_r) {
-					$itemTypeSelect .= "\n<option value=\"" . $item_type_r['s_item_type'] . "\" >" . $item_type_r['s_item_type'] . " - " . $item_type_r['description'];
+					$itemTypeSelect .= "\n<option value=\"" . $item_type_r['s_item_type'] . "\" >" . $item_type_r['s_item_type'] . " - " . $item_type_r['description'] . "</option>";
 				}
 				$itemTypeSelect .= "</select>";
 
@@ -172,12 +172,12 @@ if (is_site_enabled()) {
 			}
 
 			$attrTypeSelect = "<select name=\"attribute_type\" id=\"search-attributetype\" onChange=\"populateList(this.options[this.options.selectedIndex].value, this.form['lookup_attribute_val'], arrayOfLookupValues, false, '" . get_opendb_lang_var('use_the_value_field') . " ---->', true);\">"
-					. "\n<option value=\"\">-------------- " . get_opendb_lang_var('all') . " --------------";
+					. "\n<option value=\"\">-------------- " . get_opendb_lang_var('all') . " --------------</option>";
 
 			@reset($item_attribute_type_rs);
 			foreach ($item_attribute_type_rs as  $item_attribute_type_r) {
                 if (has_role_permission($item_attribute_type_r['view_perm'])) {
-				    $attrTypeSelect .= "\n<option value=\"" . $item_attribute_type_r['s_attribute_type'] . "\">" . $item_attribute_type_r['s_attribute_type'] . " - " . $item_attribute_type_r['description'];
+				    $attrTypeSelect .= "\n<option value=\"" . $item_attribute_type_r['s_attribute_type'] . "\">" . $item_attribute_type_r['s_attribute_type'] . " - " . $item_attribute_type_r['description'] . "</option>";
                 }
 			}
 			$attrTypeSelect .= "</select>";
@@ -186,7 +186,7 @@ if (is_site_enabled()) {
 
 			echo format_field(get_opendb_lang_var('s_attribute_type_lookup'),
 					"\n<select name=\"lookup_attribute_val\" id=\"search-lookupattributeval\" onChange=\"if(this.options[this.options.selectedIndex].value.length>0){this.form['attribute_val'].disabled=true;}else{this.form['attribute_val'].disabled=false;}\">" . "\n<option value=\"\">"
-							. get_opendb_lang_var('use_the_value_field') . " ---->" . "\n</select>");
+							. get_opendb_lang_var('use_the_value_field') . " ----></option>" . "\n</select>");
 
 			echo format_field(get_opendb_lang_var('attribute_val'),
 					"<input type=\"text\" class=\"text\" name=\"attribute_val\" id=\"search-attributeval\" size=\"50\" value=\"\">" . "\n<ul class=\"searchInputOptions\">" . "\n<li><input type=\"radio\" class=\"radio\" name=\"attr_match\" value=\"word\">" . get_opendb_lang_var('word_match')
@@ -198,8 +198,8 @@ if (is_site_enabled()) {
 			}
 
 			echo (format_field(get_opendb_lang_var('owner'),
-					"\n<select name=\"owner_id\" id=\"search-owner\">" . "\n<option value=\"\">-------------- " . get_opendb_lang_var('all') . " --------------"
-							. custom_select('owner_id', fetch_user_rs(PERM_ITEM_OWNER), '%fullname% (%user_id%)', 'NA', NULL, 'user_id') . "\n</select>"));
+					"\n<select name=\"owner_id\" id=\"search-owner\">" . "\n<option value=\"\">-------------- " . get_opendb_lang_var("all") . " --------------</option>"
+							. custom_select("owner_id", fetch_user_rs(PERM_ITEM_OWNER), "%fullname% (%user_id%)", "NA", [], "user_id") . "\n</select>"));
 
 			$lookup_results = fetch_status_type_rs(TRUE);
 
@@ -215,8 +215,8 @@ if (is_site_enabled()) {
 
 			echo format_field(get_opendb_lang_var('updated'),
 					"\n<select name=\"update_on_days\" id=\"search-updateondays\" onChange=\"if(this.options[this.options.selectedIndex].value.length>0){this.form['update_on'].disabled=true;}else{this.form['update_on'].disabled=false;}\">" . "\n<option value=\"\">"
-							. get_opendb_lang_var('specify_datetime') . " ---->" . "\n<option value=\"1\">" . get_opendb_lang_var('one_day_ago') . "\n<option value=\"7\">" . get_opendb_lang_var('one_week_ago') . "\n<option value=\"28\">" . get_opendb_lang_var('one_month_ago')
-							. "\n<option value=\"365\">" . get_opendb_lang_var('one_year_ago') . "\n</select>" . get_input_field("update_on", NULL, NULL, "datetime(" . get_opendb_config_var('search', 'datetime_mask') . ")", "N", NULL, FALSE));
+							. get_opendb_lang_var('specify_datetime') . " ----></option>" . "\n<option value=\"1\">" . get_opendb_lang_var('one_day_ago') . "</option>\n<option value=\"7\">" . get_opendb_lang_var('one_week_ago') . "</option>\n<option value=\"28\">" . get_opendb_lang_var('one_month_ago')
+							. "</option>\n<option value=\"365\">" . get_opendb_lang_var('one_year_ago') . "</option>\n</select>" . get_input_field("update_on", NULL, NULL, "datetime(" . get_opendb_config_var('search', 'datetime_mask') . ")", "N", NULL, FALSE));
 
 			echo format_field(get_opendb_lang_var('order_by'),
 					"\n<select name=\"order_by\"  id=\"search-orderby\">" . "\n<option value=\"title\" SELECTED>" . get_opendb_lang_var('title') . "\n<option value=\"owner_id\">" . get_opendb_lang_var('owner') . "\n<option value=\"category\">" . get_opendb_lang_var('category')

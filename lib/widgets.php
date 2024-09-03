@@ -78,64 +78,66 @@ function get_lookup_order_by($display_mask) {
 	You can however set the $value_column to a value indicating a column name to
 	be used instead of 'value'
 */
-function custom_select($name, $lookup_results, $display_mask, $size = 1, $value = NULL, $value_column = 'value', $include_ind_func = NULL, $checked_ind = '', $onchange_event = '', $disabled = FALSE, $id = NULL) {
-	// allows function to be called with an array of args, instead of individual arguments.
-	if (is_array ( $name )) {
-		extract ( $name );
-	}
+function custom_select($name, $lookup_results, $display_mask, $size = 1, $value = NULL, $value_column = "value", $include_ind_func = NULL, $checked_ind = "", $onchange_event = "", $disabled = FALSE, $id = NULL) {
+    // allows function to be called with an array of args, instead of individual arguments.
+    if (is_array ( $name )) {
+	extract ( $name );
+    }
 	
-	if ($size !== 'NA') {
-		if (is_numeric ( $size ) && $size > 1)
-			$var = "\n<select " . ($id != NULL ? "id=\"$id\"" : "") . " name=\"" . $name . "[]\" size=\"$size\" onchange=\"$onchange_event\"" . ($disabled ? ' DISABLED' : '') . " MULTIPLE>";
+    if ($size !== "NA") {
+	if (is_numeric ( $size ) && $size > 1)
+	    $var = "\n<select " . ($id != NULL ? "id=\"$id\"" : "") . " name=\"" . $name . "[]\" size=\"$size\" onchange=\"$onchange_event\"" . ($disabled ? ' DISABLED' : '') . " MULTIPLE>";
+	else
+	    $var = "\n<select " . ($id != NULL ? "id=\"$id\"" : "") . " name=\"$name\" onchange=\"$onchange_event\"" . ($disabled ? ' DISABLED' : '') . ">";
+    } else {
+	$var = "";
+    }
+	
+    $lookup_results = fetch_results_array ( $lookup_results );
+    reset ( $lookup_results );
+    $empty_display_mask = expand_display_mask ( $display_mask, NULL, '%' );
+	
+    $value_found = FALSE;
+    foreach ( $lookup_results as $lookup_r_key => $lookup_r_value ) {
+	$lookup_r = ["key" => $lookup_r_key, "value" => $lookup_r_value];
+	// Check if this record should be included in list of values.
+	if (! function_exists ( $include_ind_func ) || $include_ind_func ( $lookup_r )) {
+	    $lookup_value = get_array_variable_value ( $lookup_r, $value_column );
+			
+	    $display = expand_display_mask ( $display_mask, $lookup_r, '%' );
+			
+	    // if all variables were replaced with nothing, then assume empty option
+	    if (strlen ( strval ( $lookup_value ) ) == 0 && $display == $empty_display_mask) {
+		$display = "";
+	    }
+			
+	    if (is_array( $value )) {
+		if (in_array( $lookup_value, $value ) !== FALSE)
+		    $var .= "\n<option value=\"" . $lookup_value . "\" SELECTED>";
 		else
-			$var = "\n<select " . ($id != NULL ? "id=\"$id\"" : "") . " name=\"$name\" onchange=\"$onchange_event\"" . ($disabled ? ' DISABLED' : '') . ">";
-	} else {
-		$var = '';
-	}
-	
-	$lookup_results = fetch_results_array ( $lookup_results );
-	reset ( $lookup_results );
-	$empty_display_mask = expand_display_mask ( $display_mask, NULL, '%' );
-	
-	$value_found = FALSE;
-	foreach ( $lookup_results as $lookup_r_key => $lookup_r_value ) {
-		$lookup_r = ["key" => $lookup_r_key, "value" => $lookup_r_value];
-		// Check if this record should be included in list of values.
-		if (! function_exists ( $include_ind_func ) || $include_ind_func ( $lookup_r )) {
-			$lookup_value = get_array_variable_value ( $lookup_r, $value_column );
-			
-			$display = expand_display_mask ( $display_mask, $lookup_r, '%' );
-			
-			// if all variables were replaced with nothing, then assume empty option
-			if (strlen ( strval ( $lookup_value ) ) == 0 && $display == $empty_display_mask) {			//thawn: added strval() to fix variable type mismatch warning in php5.3
-				$display = '';
-			}
-			
-			if (is_array ( $value )) {
-				if (in_array ( $lookup_value, $value ) !== FALSE)
-					$var .= "\n<option value=\"" . $lookup_value . "\" SELECTED>$display";
-				else
-					$var .= "\n<option value=\"" . $lookup_value . "\">$display";
-			} else {
-				if (!$value_found && $value == NULL && ( $checked_ind == "" || $lookup_r [$checked_ind] == 'Y')) {
-					$var .= "\n<option value=\"" . $lookup_value . "\" SELECTED>$display";
-					$value_found = TRUE;
-				} else {
-					if (strcasecmp ( trim ( $value ), strval ( $lookup_value ) ) === 0) { 					//thawn: added strval() to fix variable type mismatch warning in php5.3
-						$value_found = TRUE;
-						$var .= "\n<option value=\"" . $lookup_value . "\" SELECTED>$display";
-					} else {
-						$var .= "\n<option value=\"" . $lookup_value . "\">$display";
-					}
-				}
-			}
+		    $var .= "\n<option value=\"" . $lookup_value . "\">";
+
+	    } else {
+		if (!$value_found && $value == NULL && ( $checked_ind == "" || $lookup_r [$checked_ind] == 'Y')) {
+		    $var .= "\n<option value=\"" . $lookup_value . "\" SELECTED>";
+		    $value_found = TRUE;
+		} else {
+		    if (strcasecmp( trim( $value ), strval( $lookup_value ) ) === 0) {
+			$value_found = TRUE;
+			$var .= "\n<option value=\"" . $lookup_value . "\" SELECTED>";
+		    } else {
+			$var .= "\n<option value=\"" . $lookup_value . "\">";
+		    }
 		}
+	    }
+	    $var .= "$display</option>";
 	}
+    }
 	
-	if ($size !== 'NA') {
-		$var .= "\n</select>";
-	}
-	return $var;
+    if ($size !== 'NA') {
+	$var .= "\n</select>";
+    }
+    return $var;
 }
 
 function format_data($field, $field_mask = NULL) {
