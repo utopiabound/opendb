@@ -1,5 +1,5 @@
 <?php
-/* 	
+/*
  	Open Media Collectors Database
 	Copyright (C) 2001,2013 by Jason Pell
 
@@ -159,13 +159,17 @@ class HTML_Listing extends Listing {
 			}
 			
 			$this->_write ( "<th" . (strlen ( $columnId ) > 0 ? " id=\"header-$columnId\"" : "") . ">" );
+
+            $type = $this->_header_column_rs [$i] ['type'] ?? '';
 			
-			if ($this->_header_column_rs [$i] ['type'] == 'checkbox') {
+			if ($type == 'checkbox') {
 				$this->_write ( "<input type=\"checkbox\" class=\"checkbox\" onclick=\"doChecks(this.checked, this.form, '" . $header_column_rs [$i] ['fieldname'] . "[]');return true;\">" );
-			} else if ($this->_header_column_rs [$i] ['type'] == 'interest') {
+
+			} else if ($type == 'interest') {
 				$level_header_display .= "<img" . " src=\"" . theme_image_src ( 'interest_remove.gif' ) . "\"" . " alt=\"" . get_opendb_lang_var ( 'interest_remove_all' ) . "\"" . " title=\"" . get_opendb_lang_var ( 'interest_remove_all' ) . "\"" . " onclick=\"xajax_ajax_remove_all_interest_level()\"" . " style=\"cursor:pointer;\"" . " >";
 				$this->_write ( $level_header_display );
-			} else if ($this->_header_column_rs [$i] ['sortcolumn'] !== FALSE) {
+
+            } else if ($this->_header_column_rs [$i] ['sortcolumn'] !== FALSE) {
 				$column_value = '';
 				
 				$sortorder = NULL;
@@ -196,11 +200,11 @@ class HTML_Listing extends Listing {
 				}
 				$this->_write ( ">" );
 				
-				$this->_write ( nl2br ( $header_column_rs [$i] ['title'] ) );
+				$this->_write ( nl2br ( $header_column_rs [$i] ['title'] ?? '') );
 				
 				$this->_write ( '</a>' );
 			} else {
-				$this->_write ( nl2br ( $header_column_rs [$i] ['title'] ) );
+				$this->_write ( nl2br ( $header_column_rs [$i] ['title'] ?? '') );
 			}
 			$this->_write ( "</th>" );
 		} //for($i=0; $i<count($this->_header_column_rs); $i++)
@@ -296,7 +300,7 @@ class HTML_Listing extends Listing {
 					$this->_write ( '<td class="item_type_image ' . $columnClass . '">' );
 					$s_item_type = $row_column_rs [$i] ['s_item_type'];
 					
-					if (! is_array ( $this->_item_type_rs [$s_item_type] ) || strlen ( $this->_item_type_rs [$s_item_type] ['image'] ) == 0) {
+					if (! is_array ( $this->_item_type_rs[$s_item_type] ?? NULL) || strlen ( $this->_item_type_rs[$s_item_type]['image'] ?? '') == 0) {
 						$this->_item_type_rs [$s_item_type] = fetch_item_type_r ( $s_item_type );
 						
 						// expand to the actual location once only.
@@ -349,30 +353,31 @@ class HTML_Listing extends Listing {
 						$this->addHelpEntry ( get_opendb_lang_var ( 'youve_borrow_or_return' ), 'tick.gif', 'borrow_or_return' );
 						$item_title .= theme_image ( "tick.gif", get_opendb_lang_var ( 'youve_borrow_or_return' ), 'borrow_or_return' ); // show tick if previously borrowed or returned.
 					}
-					
+
 					$this->_write ( '<td class="title ' . $columnClass . '">' );
 					$this->_write ( $item_title );
 					$this->_write ( '</td>' );
 					break;
-				
-				case 'coverimage' :
+
+            case 'coverimage' :
 					$item_cover_image = $row_column_rs [$i] ['item_cover_image'];
 					$title_href_link = $row_column_rs [$i] ['title_href_link'];
 					
-					$this->_write ( '<td class="coverimage ' . $columnId . 'Column">' );
+					$this->_write ( '<td class="coverimage">' );
 					$file_r = file_cache_get_image_r ( $item_cover_image, 'listing' );
 					if (is_array ( $file_r )) {
 						$cover_image_tag = '<img src="' . $file_r ['thumbnail'] ['url'] . '"';
 						
-						if (is_numeric ( $file_r ['thumbnail'] ['width'] ))
+						if (is_numeric ( $file_r['thumbnail']['width'] ?? NULL))
 							$cover_image_tag .= ' width="' . $file_r ['thumbnail'] ['width'] . '"';
-						if (is_numeric ( $file_r ['thumbnail'] ['height'] ))
+
+                        if (is_numeric ( $file_r['thumbnail']['height'] ?? NULL))
 							$cover_image_tag .= ' height="' . $file_r ['thumbnail'] ['height'] . '"';
 						
 						$cover_image_tag .= '>';
-						
-						if ($this->_mode != 'printable' && $this->_include_href_links) {
-							$cover_image_tag = '<a href="' . $title_href_link . '">' . $cover_image_tag . '</a>';
+
+						if ($this->_http_vars['mode'] != 'printable' && $this->_include_href_links) {
+                            $cover_image_tag = '<a href="' . $title_href_link . '">' . $cover_image_tag . '</a>';
 						}
 						
 						$this->_write ( $cover_image_tag );

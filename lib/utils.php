@@ -89,10 +89,10 @@ function generate_random_num() {
 	instead.
 */
 function ifempty($value, $ifnull) {
-	if (strlen( $value ?? '' ) > 0)
-		return $value;
-	else
-		return $ifnull;
+    if (isset($value) && strlen( $value ?? '' ) > 0)
+        return $value;
+    else
+        return $ifnull;
 }
 
 /**

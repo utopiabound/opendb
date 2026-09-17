@@ -60,6 +60,31 @@ function _boldul2array($ul) {
     return _def2array($ul, 'li', 'b');
 }
 
+function _spans2array($outer, $item, $def) {
+    $a = [];
+    foreach($outer->getElementsByTagName($item) as $li) {
+        $key = false;
+	$value = false;
+        foreach($li->getElementsByTagName($def) as $c) {
+	    if ($span->className != "a-list-item") {
+                if ($key) {
+                    if (trim($c->textContent))
+                        $value = trim($c->textContent);
+		} else if ($c->nodeType == XML_ELEMENT_NODE && $c->tagName == $def && trim($c->textContent))
+                    $key = $c;
+	    }
+	}
+        if ($value)
+            $a[trim($key->textContent, " \t\n\r\0\x0B:")] = trim($value);
+    }
+    return $a;
+}
+
+// DOMElement of <UL><li><span class="something list item"><span class="something bold:>KEY :</span><span>VALUE</span></span></li>
+function _ulspan2array($ul) {
+    return _spans2array($ul, 'li', 'span');
+}
+
 function amazon_details($xmlDoc) {
     // UL of definition list items
     $e = $xmlDoc->getElementById('productDetailsTable');
@@ -69,6 +94,12 @@ function amazon_details($xmlDoc) {
         $e = $e->getElementsByTagName('ul')->item(0);
         if ($e)
             return _boldul2array($e);
+    }
+    $e = $xmlDoc->getElementById('detailBullets_feature_div');
+    if ($e) {
+       $e = $e->getElementsByTagName('ul')->item(0);
+       if ($e)
+           return _ulspan2array($e);
     }
 
     // Table of th td pairs

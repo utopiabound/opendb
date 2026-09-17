@@ -315,12 +315,12 @@ function get_column_display_config(&$HTTP_VARS, $show_owner_column, $show_action
 				array('column_type' => 's_attribute_type',
 					  's_attribute_type' => $HTTP_VARS['attribute_type'],
 					  'attribute_val' => $HTTP_VARS['attribute_val'],
-					  'lookup_attribute_val' => $HTTP_VARS['lookup_attribute_val'],
+					  'lookup_attribute_val' => $HTTP_VARS['lookup_attribute_val'] ?? '',
 					  'attr_match' => $HTTP_VARS['attr_match'],
-					  'attr_update_on' => $HTTP_VARS['attr_update_on'],
-					  'attr_update_on_days' => $HTTP_VARS['attr_update_on_days'],
+					  'attr_update_on' => $HTTP_VARS['attr_update_on'] ?? '',
+					  'attr_update_on_days' => $HTTP_VARS['attr_update_on_days'] ?? '',
 					  'orderby_support_ind' => 'Y',
-					  'search_attribute_ind' => ifempty($HTTP_VARS['search_list'], $HTTP_VARS['attribute_list']))));
+					  'search_attribute_ind' => ifempty($HTTP_VARS['search_list'] ?? '', $HTTP_VARS['attribute_list'] ?? ''))));
 	}
 
 	// need to add status_comment to listing if search for status comment enabled.							
@@ -349,9 +349,9 @@ function get_column_display_config(&$HTTP_VARS, $show_owner_column, $show_action
 			$v_attribute_type_r = fetch_cached_attribute_type_r($v_column_display_config_rs[$i]['s_attribute_type']);
 			if (is_array($v_attribute_type_r)) {
 				if (strlen($HTTP_VARS['s_item_type'] ?? '') > 0) {
-					$v_column_display_config_rs[$i]['prompt'] = ifempty(fetch_s_item_type_attr_prompt($HTTP_VARS['s_item_type'], $v_column_display_config_rs[$i]['s_attribute_type']), $v_attribute_type_r['prompt']);
+					$v_column_display_config_rs[$i]['prompt'] = ifempty(fetch_s_item_type_attr_prompt($HTTP_VARS['s_item_type'] ?? '', $v_column_display_config_rs[$i]['s_attribute_type']), $v_attribute_type_r['prompt']);
 				} else {
-					$v_column_display_config_rs[$i]['prompt'] = ifempty($v_column_display_config_rs[$i]['override_prompt'], $v_attribute_type_r['prompt']);
+					$v_column_display_config_rs[$i]['prompt'] = ifempty($v_column_display_config_rs[$i]['override_prompt'] ?? '', $v_attribute_type_r['prompt']);
 				}
 
 				// record whether the s_attribute_type is a lookup attribute_type for use while generating the page.
@@ -369,7 +369,7 @@ function get_column_display_config(&$HTTP_VARS, $show_owner_column, $show_action
 				}
 
 				if ($v_column_display_config_rs[$i]['orderby_support_ind'] === 'Y') {
-					if ($v_column_display_config_rs[$i]['orderby_datatype'] != 'numeric' && $v_attribute_type_r['input_type'] == 'number') {
+					if (($v_column_display_config_rs[$i]['orderby_datatype'] ?? '') != 'numeric' && $v_attribute_type_r['input_type'] == 'number') {
 						$v_column_display_config_rs[$i]['orderby_datatype'] = 'numeric';
 					}
 				}
@@ -381,8 +381,8 @@ function get_column_display_config(&$HTTP_VARS, $show_owner_column, $show_action
 
 				// TODO - revise to get rid of this reverse logic!!!! 
 				if (($v_column_display_config_rs[$i]['search_attribute_ind'] ?? '') != 'y' ||
-					$v_column_display_config_rs[$i]['item_listing_conf_ind'] == 'Y' ||
-					$v_column_display_config_rs[$i]['attr_match'] != 'exact' ||
+					($v_column_display_config_rs[$i]['item_listing_conf_ind'] ?? '') == 'Y' ||
+					($v_column_display_config_rs[$i]['attr_match'] ?? '') != 'exact' ||
 					get_opendb_config_var('listings', 'show_exact_match_search_columns') !== FALSE)
 				{
 					$v_column_display_config_rs[$i]['include_in_listing'] = TRUE;
@@ -396,7 +396,7 @@ function get_column_display_config(&$HTTP_VARS, $show_owner_column, $show_action
 
 				$v_attribute_type_r = fetch_cached_attribute_type_r($v_column_display_config_rs[$i]['s_attribute_type']);
 
-				$v_column_display_config_rs[$i]['prompt'] = ifempty($v_column_display_config_rs[$i]['override_prompt'], $v_attribute_type_r['prompt']);
+				$v_column_display_config_rs[$i]['prompt'] = ifempty($v_column_display_config_rs[$i]['override_prompt'] ?? '', $v_attribute_type_r['prompt']);
 
 				$v_column_display_config_rs[$i]['fieldname'] = 'rating';
 				$v_column_display_config_rs[$i]['orderby_support_ind'] = 'N';
@@ -405,32 +405,32 @@ function get_column_display_config(&$HTTP_VARS, $show_owner_column, $show_action
 
 				$v_attribute_type_r = fetch_cached_attribute_type_r($v_column_display_config_rs[$i]['s_attribute_type']);
 
-				$v_column_display_config_rs[$i]['prompt'] = ifempty($v_column_display_config_rs[$i]['override_prompt'], $v_attribute_type_r['prompt']);
+				$v_column_display_config_rs[$i]['prompt'] = ifempty($v_column_display_config_rs[$i]['override_prompt'] ?? '', $v_attribute_type_r['prompt']);
 
 				$v_column_display_config_rs[$i]['fieldname'] = 'item_id';
 			} else if ($v_column_display_config_rs[$i]['s_field_type'] == 'CATEGORY') {
-				$v_column_display_config_rs[$i]['prompt'] = ifempty($v_column_display_config_rs[$i]['override_prompt'], get_opendb_lang_var('category'));
+				$v_column_display_config_rs[$i]['prompt'] = ifempty($v_column_display_config_rs[$i]['override_prompt'] ?? '', get_opendb_lang_var('category'));
 
 				$v_column_display_config_rs[$i]['fieldname'] = 'category';
 			} else if ($v_column_display_config_rs[$i]['s_field_type'] == 'STATUSTYPE') {
-				$v_column_display_config_rs[$i]['prompt'] = ifempty($v_column_display_config_rs[$i]['override_prompt'], get_opendb_lang_var('status'));
+				$v_column_display_config_rs[$i]['prompt'] = ifempty($v_column_display_config_rs[$i]['override_prompt'] ?? '', get_opendb_lang_var('status'));
 
 				$v_column_display_config_rs[$i]['fieldname'] = 's_status_type';
 			} else if ($v_column_display_config_rs[$i]['s_field_type'] == 'STATUSCMNT') {
-				$v_column_display_config_rs[$i]['prompt'] = ifempty($v_column_display_config_rs[$i]['override_prompt'], get_opendb_lang_var('status_comment'));
+				$v_column_display_config_rs[$i]['prompt'] = ifempty($v_column_display_config_rs[$i]['override_prompt'] ?? '', get_opendb_lang_var('status_comment'));
 
 				$v_column_display_config_rs[$i]['fieldname'] = 'statuscmnt';
 				$v_column_display_config_rs[$i]['orderby_support_ind'] = 'N';
 			} else if ($v_column_display_config_rs[$i]['s_field_type'] == 'TITLE') {
-				$v_column_display_config_rs[$i]['prompt'] = ifempty($v_column_display_config_rs[$i]['override_prompt'], get_opendb_lang_var('title'));
+				$v_column_display_config_rs[$i]['prompt'] = ifempty($v_column_display_config_rs[$i]['override_prompt'] ?? '', get_opendb_lang_var('title'));
 
 				$v_column_display_config_rs[$i]['fieldname'] = 'title';
 			} else if ($v_column_display_config_rs[$i]['s_field_type'] == 'ITEMTYPE') {
-				$v_column_display_config_rs[$i]['prompt'] = ifempty($v_column_display_config_rs[$i]['override_prompt'], get_opendb_lang_var('type'));
+				$v_column_display_config_rs[$i]['prompt'] = ifempty($v_column_display_config_rs[$i]['override_prompt'] ?? '', get_opendb_lang_var('type'));
 
 				$v_column_display_config_rs[$i]['fieldname'] = 's_item_type';
 			} else if ($v_column_display_config_rs[$i]['s_field_type'] == 'OWNER') {
-				$v_column_display_config_rs[$i]['prompt'] = ifempty($v_column_display_config_rs[$i]['override_prompt'], get_opendb_lang_var('owner'));
+				$v_column_display_config_rs[$i]['prompt'] = ifempty($v_column_display_config_rs[$i]['override_prompt'] ?? '', get_opendb_lang_var('owner'));
 				$v_column_display_config_rs[$i]['fieldname'] = 'owner_id';
 
 				if (!$show_owner_column) {
@@ -438,12 +438,12 @@ function get_column_display_config(&$HTTP_VARS, $show_owner_column, $show_action
 				}
 			} else if ($v_column_display_config_rs[$i]['s_field_type'] == 'INTEREST') {
 				if ($show_interest_column) {
-					$v_column_display_config_rs[$i]['prompt'] = ifempty($v_column_display_config_rs[$i]['override_prompt'], get_opendb_lang_var('interest'));
+					$v_column_display_config_rs[$i]['prompt'] = ifempty($v_column_display_config_rs[$i]['override_prompt'] ?? '', get_opendb_lang_var('interest'));
 					$v_column_display_config_rs[$i]['fieldname'] = 'interest';
 				}
 			}
 		} else if ($v_column_display_config_rs[$i]['column_type'] == 'action_links') {
-			$v_column_display_config_rs[$i]['prompt'] = ifempty($v_column_display_config_rs[$i]['override_prompt'], get_opendb_lang_var('action'));
+			$v_column_display_config_rs[$i]['prompt'] = ifempty($v_column_display_config_rs[$i]['override_prompt'] ?? '', get_opendb_lang_var('action'));
 
 			$v_column_display_config_rs[$i]['fieldname'] = 'action_links';
 			$v_column_display_config_rs[$i]['orderby_support_ind'] = 'N';
@@ -452,7 +452,7 @@ function get_column_display_config(&$HTTP_VARS, $show_owner_column, $show_action
 				$v_column_display_config_rs[$i]['include_in_listing'] = FALSE;
 			}
 		} else if (get_opendb_config_var('borrow', 'enable') !== FALSE && $v_column_display_config_rs[$i]['column_type'] == 'borrow_status') {
-			$v_column_display_config_rs[$i]['prompt'] = ifempty($v_column_display_config_rs[$i]['override_prompt'], get_opendb_lang_var('borrow_status'));
+			$v_column_display_config_rs[$i]['prompt'] = ifempty($v_column_display_config_rs[$i]['override_prompt'] ?? '', get_opendb_lang_var('borrow_status'));
 			$v_column_display_config_rs[$i]['fieldname'] = 'borrow_status';
 			$v_column_display_config_rs[$i]['orderby_support_ind'] = 'N';
 		}
@@ -475,7 +475,7 @@ function get_search_query_matrix($HTTP_VARS) {
 
 	$searches = array();
 
-	if (strlen($HTTP_VARS['title']) > 0) {
+	if (strlen($HTTP_VARS['title'] ?? '') > 0) {
 		// Default title match is exact match.
 		$HTTP_VARS['title_match'] = ifempty($HTTP_VARS['title_match'], 'exact');
 
@@ -539,7 +539,7 @@ function get_search_query_matrix($HTTP_VARS) {
 			$HTTP_VARS['attr_match'] = ifempty($HTTP_VARS['attr_match'], 'exact');
 
 			// Special category search, but ignore if category variable actually specified.
-			if (strlen($HTTP_VARS['category']) == 0 && strlen($HTTP_VARS['attribute_val']) > 0 && $HTTP_VARS['attr_match'] == 'category') {
+			if (strlen($HTTP_VARS['category'] ?? '') == 0 && strlen($HTTP_VARS['attribute_val'] ?? '') > 0 && $HTTP_VARS['attr_match'] == 'category') {
 				// We do not want the Listing Link to be added to this display field
 				$searches[] = array('prompt' => $attribute_type_r['prompt'], 'field' => get_item_display_field(NULL, $attribute_type_r, stripslashes($HTTP_VARS['attribute_val']), FALSE));
 			} else {
@@ -714,11 +714,12 @@ if (is_site_enabled()) {
 			$v_column_display_config_rs = get_column_display_config($HTTP_VARS, $show_owner_column, $show_action_column, $show_interest_column);
 
 			$page_title = NULL;
-			if ($HTTP_VARS['search_list'] == 'y' || $HTTP_VARS['attribute_list'] == 'y') {
+			if (($HTTP_VARS['search_list'] ?? '') == 'y' || ($HTTP_VARS['attribute_list'] ?? '') == 'y') {
 				if (strlen($HTTP_VARS['override_page_title'] ?? '') > 0)
 					$page_title = $HTTP_VARS['override_page_title'];
 				else
 					$page_title = get_opendb_lang_var('search_results');
+
 			} else if (is_valid_s_status_type($HTTP_VARS['s_status_type'])) {
 				$status_type_r = fetch_status_type_r($HTTP_VARS['s_status_type']);
 
@@ -744,7 +745,7 @@ if (is_site_enabled()) {
 			echo (_theme_header($page_title, $HTTP_VARS['inc_menu'] ?? NULL));
 			echo ('<h2>' . $page_title . '</h2>');
 
-			if ($HTTP_VARS['search_list'] == 'y' || $HTTP_VARS['attribute_list'] == 'y') {
+			if (($HTTP_VARS['search_list'] ?? '') == 'y' || ($HTTP_VARS['attribute_list'] ?? '') == 'y') {
 				// default search term if attribute_type specified, but no value provided.
 				if (strlen($HTTP_VARS['attribute_type'] ?? '') > 0 &&
 					strlen($HTTP_VARS['attribute_val'] ?? '') == 0 &&
@@ -792,6 +793,20 @@ if (is_site_enabled()) {
 				$listingObject->setTotalItems(fetch_item_listing_cnt($HTTP_VARS, $v_column_display_config_rs));
 			}
 
+            $results = fetch_status_type_rs();
+            if ($results) {
+                $status_type_rs = array();
+                while ($status_type_r = db_fetch_assoc($results)) {
+                    $status_type_r['total'] = 0;
+                    $status_type_rs[] = $status_type_r;
+                }
+                db_free_result($results);
+            }
+
+            if (!is_array($item_types_rs ?? NULL)) {
+                $item_types_rs = array();
+            }
+            
 			// -------------------------------------- Process the Query here -----------------------------------------------------------------
 			if (($result = fetch_item_listing_rs($HTTP_VARS, 
 						$v_column_display_config_rs, // calculated above
@@ -819,7 +834,7 @@ if (is_site_enabled()) {
 					$listingObject->startRow();
 
 					// Get the Status Type config for the current item_instance.s_status_type, but grab it once.
-					if (!is_array($status_type_rs[$item_r['s_status_type']])) {
+					if (!is_array($status_type_rs[$item_r['s_status_type']] ?? NULL)) {
 						$status_type_rs[$item_r['s_status_type']] = fetch_status_type_r($item_r['s_status_type']);
 					}
 
@@ -840,9 +855,9 @@ if (is_site_enabled()) {
 					for ($i = 0; $i < count($v_column_display_config_rs); $i++) {
 						if ($v_column_display_config_rs[$i]['include_in_listing'] !== FALSE) {
 							if ($v_column_display_config_rs[$i]['column_type'] == 's_attribute_type') {
-								if ($v_column_display_config_rs[$i]['search_attribute_ind'] == 'y') {
+								if (($v_column_display_config_rs[$i]['search_attribute_ind'] ?? '') == 'y') {
 									$attribute_val = $item_r[$v_column_display_config_rs[$i]['fieldname']];
-								} else if ($v_column_display_config_rs[$i]['multi_attribute_ind'] == 'Y' || $v_column_display_config_rs[$i]['lookup_attribute_ind'] == 'Y') {
+								} else if (($v_column_display_config_rs[$i]['multi_attribute_ind'] ?? '') == 'Y' || $v_column_display_config_rs[$i]['lookup_attribute_ind'] == 'Y') {
 									$attribute_val = fetch_attribute_val_r($item_r['item_id'], $item_r['instance_no'], $v_column_display_config_rs[$i]['s_attribute_type']);
 								} else {
 									$attribute_val = fetch_attribute_val($item_r['item_id'], $item_r['instance_no'], $v_column_display_config_rs[$i]['s_attribute_type']);
@@ -908,7 +923,7 @@ if (is_site_enabled()) {
 											$action_links_rs[] = array('url' => 'item_input.php?op=edit&item_id=' . $item_r['item_id'] . '&instance_no=' . $item_r['instance_no'], 'img' => 'edit.gif', 'text' => get_opendb_lang_var('edit'));
 
 											// So we only have to check the 'is_site_plugin' once!
-											if (strlen($item_types_rs[$item_r['s_item_type']]['legal_site_type']) == 0) {
+											if (strlen($item_types_rs[$item_r['s_item_type']]['legal_site_type'] ?? '') == 0) {
 												$item_types_rs[$item_r['s_item_type']]['legal_site_type'] = is_item_legal_site_type($item_r['s_item_type']);
 											}
 

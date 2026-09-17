@@ -90,7 +90,7 @@ function getItemsPerPageControl($PHP_SELF, $HTTP_VARS) {
 					'display' => $display );
 		}
 		
-		$buffer .= "<form class=\"itemsPerPageControl\" id=\"form-items_per_page\" action=\"" . $PHP_SELF . "\" method=\"GET\">" . get_url_fields ( $HTTP_VARS ) . "<label for=\"select-items_per_page\">" . get_opendb_lang_var ( 'items_per_page' ) . '</label>' . "<select id=\"select-items_per_page\" name=\"items_per_page\" class=\"footer\" onChange=\"this.form.submit()\">" . custom_select ( 'items_per_page', $items_per_page_rs, '%display%', 'NA', ifempty ( $HTTP_VARS ['items_per_page'], get_opendb_config_var ( 'listings', 'items_per_page' ) ), 'value' ) . "\n</select></form>";
+		$buffer .= "<form class=\"itemsPerPageControl\" id=\"form-items_per_page\" action=\"" . $PHP_SELF . "\" method=\"GET\">" . get_url_fields ( $HTTP_VARS ) . "<label for=\"select-items_per_page\">" . get_opendb_lang_var ( 'items_per_page' ) . '</label>' . "<select id=\"select-items_per_page\" name=\"items_per_page\" class=\"footer\" onChange=\"this.form.submit()\">" . custom_select ( 'items_per_page', $items_per_page_rs, '%display%', 'NA', ifempty ( $HTTP_VARS ['items_per_page'] ?? '', get_opendb_config_var ( 'listings', 'items_per_page' ) ), 'value' ) . "\n</select></form>";
 	}
 	return $buffer;
 }

@@ -81,7 +81,7 @@ function get_lookup_order_by($display_mask) {
 function custom_select($name, $lookup_results, $display_mask, $size = 1, $value = NULL, $value_column = "value", $include_ind_func = NULL, $checked_ind = "", $onchange_event = "", $disabled = FALSE, $id = NULL) {
     // allows function to be called with an array of args, instead of individual arguments.
     if (is_array ( $name )) {
-	extract ( $name );
+        extract ( $name );
     }
 	
     if ($size !== "NA") {
@@ -173,8 +173,8 @@ function format_item_data_field($attribute_type_r, $field, $prompt_mask = NULL) 
 		$prompt .= theme_image ( "compulsory.gif", get_opendb_lang_var ( 'compulsory_field' ), 'compulsory' );
 	}
 	
-	$fieldid = strtolower ( str_replace ( '_', '-', $attribute_type_r ['s_attribute_type'] ) . '-' . $attribute_type_r ['order_no'] );
-	$fieldclass = strtolower ( str_replace ( '_', NULL, $attribute_type_r ['s_attribute_type'] ) );
+	$fieldid = str_replace('_', '-', get_field_name($attribute_type_r['s_attribute_type'],  $attribute_type_r['order_no'] ?? NULL));
+	$fieldclass = strtolower( str_replace ( '_', NULL, $attribute_type_r ['s_attribute_type'] ) );
 	
 	return "\n<tr id=\"$fieldid\">" . "<th class=\"prompt\" scope=\"row\">$prompt:</th>" . "<td class=\"data $fieldclass\">" . ifempty ( $field, '&nbsp;' ) . "</td>" . "</tr>";
 }

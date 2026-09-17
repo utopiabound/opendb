@@ -82,7 +82,7 @@ function fget_tokenised_log_entry(&$file) {
 		for($i = 0; $i < strlen ( $line ); $i ++) {
 			switch ($line[$i]) {
 				case "\\" :
-					if ($i < strlen ( $line + 1 ) && $line[$i + 1] != '"') {
+					if ($i < strlen ( $line ) + 1 && $line[$i + 1] != '"') {
 						$column .= $line[$i];
 					}
 					break;

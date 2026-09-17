@@ -76,7 +76,8 @@ if (is_site_enabled()) {
 
 						// provide default if no images
 						if ($coverimages_rs == NULL) {
-							$coverimages_rs[] = array('file' => file_cache_get_image_r(NULL, 'display'));
+							$coverimages_rs[] = array('file' => file_cache_get_image_r(NULL, 'display'),
+                                                      'prompt' => "Default Image");
 						}
 
 						echo ("<ul class=\"coverimages\">");
@@ -84,7 +85,7 @@ if (is_site_enabled()) {
 							echo ("<li>");
 							$file_r = $coverimage_r['file'];
 
-							if (strlen($file_r['fullsize']['url']) > 0) {
+							if (isset($file_r['fullsize']) && strlen($file_r['fullsize']['url']) > 0) {
 								$width = $file_r['fullsize']['width'];
 								$height = $file_r['fullsize']['height'];
 
@@ -107,7 +108,7 @@ if (is_site_enabled()) {
 								echo (' height="' . $file_r['thumbnail']['height'] . '"');
 
 							echo (">");
-							if (strlen($file_r['fullsize']['url']) > 0) {
+							if (isset($file_r['fullsize']) && strlen($file_r['fullsize']['url']) > 0) {
 								echo ("</a>");
 							}
 							echo ("</li>");

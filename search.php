@@ -193,7 +193,7 @@ if (is_site_enabled()) {
 							. "</li>" . "\n<li><input type=\"radio\" class=\"radio\" name=\"attr_match\" value=\"partial\" CHECKED>" . get_opendb_lang_var('partial_match') . "</li>" . "\n<li><input type=\"radio\" class=\"radio\" name=\"attr_match\" value=\"exact\">"
 							. get_opendb_lang_var('exact_match') . "</li>" . "\n<li><input type=\"checkbox\" class=\"checkbox\" name=\"attr_case\" value=\"case_sensitive\">" . get_opendb_lang_var('case_sensitive') . "</li>" . "\n</ul>");
 
-			if (strlen($HTTP_VARS['not_owner_id']) > 0) {
+			if (strlen($HTTP_VARS['not_owner_id'] ?? '') > 0) {
 				echo ("\n<input type=\"hidden\" name=\"not_owner_id\" value=\"" . $HTTP_VARS['not_owner_id'] . "\">");
 			}
 

@@ -327,7 +327,7 @@ class Listing {
 		if ($header_column_r ['cover_image_support'] === TRUE) {
 			$item_cover_image = NULL;
 			
-			if (strlen ( $this->_item_type_rs [$s_item_type] ['image_attribute_type'] ) === 0) {
+			if (strlen ( $this->_item_type_rs [$s_item_type] ['image_attribute_type'] ?? '') === 0) {
 				$this->_item_type_rs [$s_item_type] ['image_attribute_type_r'] = fetch_sfieldtype_item_attribute_type_r ( $s_item_type, 'IMAGE' );
 			}
 			

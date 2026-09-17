@@ -211,43 +211,43 @@ class SitePlugin {
 	    $title = trim ( strip_tags ( $title ) );
 	    $comments = trim ( strip_tags ( $comments ) );
 	    $cover_image_url = trim ( strip_tags ( $cover_image_url ) );
-		
-	    if (is_array ( $attributes_r )) {
-		// lets make sure we don't already have a row with the same $attributes_r set.
-		if (isset($this->_item_list_rs) && is_array($this->_item_list_rs)) {
-		    for ($i = 0; $i < count ( $this->_item_list_rs ); $i ++) {
-			if (is_array ( $this->_item_list_rs["attributes"] )) {
-			    $found = TRUE;
-			    reset ( $attributes_r );
-			    foreach ($attributes_r as $key => $value) {
-				// if not set, this is considered no match and do next for loop cycle
-				if (! isset( $this->_item_list_rs ['attributes'] [$key] ) ||
-				    $this->_item_list_rs ['attributes'] [$key] != $key)
-				{
-				    $found = FALSE;
-				    break;
-				}
-			    }
-				
-			    if ($found) {
-				return FALSE;
-			    }
-			}
-		    }
-		}
-			
-		if (strlen ( $this->_more_info_url ) > 0) {
-		    $more_info_url = $this->_titleMaskCfg->expand_mask ( $attributes_r, $this->_more_info_url );
-		}
 
-		$opendb_link_url = get_url_string ( $this->_http_vars, $attributes_r );
+	    if (is_array ( $attributes_r )) {
+            // lets make sure we don't already have a row with the same $attributes_r set.
+            if (isset($this->_item_list_rs) && is_array($this->_item_list_rs)) {
+                for ($i = 0; $i < count ( $this->_item_list_rs ); $i ++) {
+                    if (is_array ( $this->_item_list_rs["attributes"] )) {
+                        $found = TRUE;
+                        reset ( $attributes_r );
+                        foreach ($attributes_r as $key => $value) {
+                            // if not set, this is considered no match and do next for loop cycle
+                            if (! isset( $this->_item_list_rs ['attributes'] [$key] ) ||
+                                $this->_item_list_rs ['attributes'] [$key] != $key)
+                            {
+                                $found = FALSE;
+                                break;
+                            }
+                        }
+                        
+                        if ($found) {
+                            return FALSE;
+                        }
+                    }
+                }
+            }
 			
-		$this->_item_list_rs [] = array('title' => $title,
-						'cover_image_url' => trim ( $cover_image_url ),
-						'comments' => trim ( strip_tags ( str_replace ( '<br>', "\n", $comments ) ) ),
-						'more_info_url' => trim ( $more_info_url ),
-						'opendb_link_url' => trim ( $opendb_link_url ),
-						'attributes' => $attributes_r );
+            if (strlen ( $this->_more_info_url ) > 0) {
+                $more_info_url = $this->_titleMaskCfg->expand_mask ( $attributes_r, $this->_more_info_url );
+            }
+
+            $opendb_link_url = get_url_string ( $this->_http_vars, $attributes_r );
+			
+            $this->_item_list_rs [] = array('title' => $title,
+                                            'cover_image_url' => trim ( $cover_image_url ),
+                                            'comments' => trim ( strip_tags ( str_replace ( '<br>', "\n", $comments ) ) ),
+                                            'more_info_url' => trim ( $more_info_url ),
+                                            'opendb_link_url' => trim ( $opendb_link_url ),
+                                            'attributes' => $attributes_r );
 	    }
 	    // else ignore
 

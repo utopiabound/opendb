@@ -106,6 +106,7 @@ function fetch_item_instance_cnt($s_item_type = NULL) {
 	}
 	
 	$query .= "$from $where";
+	$result = db_query ( $query );
 	return db_result_single_lookup($result, 'count');
 }
 
@@ -572,7 +573,7 @@ function fetch_item_listing_rs($HTTP_VARS, $column_display_config_rs, $order_by,
 			$fieldname = NULL;
 			
 			if ($column_display_config_rs [$i] ['column_type'] == 's_attribute_type') {
-				$fieldname = get_field_name ( $column_display_config_rs [$i] ['s_attribute_type'], $column_display_config_rs [$i] ['order_no'] );
+				$fieldname = get_field_name ( $column_display_config_rs [$i] ['s_attribute_type'], $column_display_config_rs [$i] ['order_no'] ?? NULL);
 				
 				// if not an order by column, we want to generate the fields individually in the listings page.
 				if ($column_display_config_rs [$i] ['orderby_support_ind'] === 'Y' || $column_display_config_rs [$i] ['search_attribute_ind'] === 'y') {
@@ -589,9 +590,9 @@ function fetch_item_listing_rs($HTTP_VARS, $column_display_config_rs, $order_by,
 				// and ITEMTYPE.
 				$field_type_fieldnames_r = array (
 						'ITEM_ID' => 'i.id',
-						//'TITLE'=>'i.title',
+						'TITLE'=>'i.title',
 						'STATUSTYPE' => 'ii.s_status_type',
-						//'ITEMTYPE'=>'i.s_item_type',
+						'ITEMTYPE'=>'i.s_item_type',
 						'OWNER' => 'ii.owner_id' );
 				
 				if ($column_display_config_rs [$i] ['s_field_type'] == 'CATEGORY') {
@@ -818,13 +819,13 @@ function from_and_where_clause($HTTP_VARS, $column_display_config_rs = NULL, $qu
 	if (is_array ( $column_display_config_rs )) {
 		for($i = 0; $i < count ( $column_display_config_rs ); $i ++) {
 			if ($column_display_config_rs [$i] ['column_type'] == 's_attribute_type') {
-				if ($column_display_config_rs [$i] ['search_attribute_ind'] != 'y') {
+				if (($column_display_config_rs[$i]['search_attribute_ind'] ?? '') != 'y') {
 					// either LISTING or COUNT
 					if ($query_type != 'COUNT') {
 						$left_join = 'LEFT JOIN item_attribute ia' . $i . ' ON ' . 'ia' . $i . '.item_id = i.id AND (ia' . $i . '.instance_no = 0 OR ia' . $i . '.instance_no = ii.instance_no) AND ia' . $i . '.s_attribute_type = \'' . $column_display_config_rs [$i] ['s_attribute_type'] . '\' AND ia' . $i . '.attribute_no = 1';
 						
 						// So we can work out which search attribute types to display
-						if (is_numeric ( $column_display_config_rs [$i] ['order_no'] )) {
+						if (is_numeric( $column_display_config_rs [$i] ['order_no'] ?? '')) {
 							$left_join .= ' AND ia' . $i . '.order_no = ' . $column_display_config_rs [$i] ['order_no'];
 						}
 						$left_join_from_r [] = $left_join;
@@ -840,7 +841,7 @@ function from_and_where_clause($HTTP_VARS, $column_display_config_rs = NULL, $qu
 						$parser = new BooleanParser ();
 						$statements = $parser->parseBooleanStatement ( strtoupper ( str_replace ( "'", "\\'", $column_display_config_rs [$i] ['attribute_val'] ) ) );
 						if (is_array ( $statements )) {
-							if ($column_display_config_rs [$i] ['lookup_attribute_ind'] == 'Y') {
+							if (($column_display_config_rs[$i]['lookup_attribute_ind'] ?? '') == 'Y') {
 								$where_r [] = build_boolean_clause ( $statements, 'ia' . $i . '.lookup_attribute_val', 'plain', 'AND', $HTTP_VARS ['attr_case'] );
 							} else {
 								$where_r [] = build_boolean_clause ( $statements, 'ia' . $i . '.attribute_val', $column_display_config_rs [$i] ['attr_match'], 'AND', $HTTP_VARS ['attr_case'] );
@@ -859,8 +860,8 @@ function from_and_where_clause($HTTP_VARS, $column_display_config_rs = NULL, $qu
 						$where_r [] = 'UPPER(ia' . $i . '.attribute_val) = \'' . str_replace ( '\_', '_', $value ) . '\'';
 					}
 					
-					if (strlen ( $HTTP_VARS ['attr_update_on'] ) > 0) {
-						if (strlen ( $HTTP_VARS ['datetimemask'] ) > 0) {
+					if (strlen( $HTTP_VARS['attr_update_on'] ?? '') > 0) {
+						if (strlen( $HTTP_VARS['datetimemask'] ?? '') > 0) {
 							$timestamp = get_timestamp_for_datetime ( $HTTP_VARS ['attr_update_on'], $HTTP_VARS ['datetimemask'] );
 							if ($timestamp !== FALSE) {
 								$where_r [] = 'ia' . $i . '.update_on >= FROM_UNIXTIME(' . $timestamp . ')';
@@ -871,7 +872,7 @@ function from_and_where_clause($HTTP_VARS, $column_display_config_rs = NULL, $qu
 						} else {
 							$where_r [] = 'ia' . $i . '.update_on >= \'' . $HTTP_VARS ['attr_update_on'] . '\'';
 						}
-					} else if (is_numeric ( $HTTP_VARS ['attr_update_on_days'] )) {	// GIve us all records updated in the last however many days.
+					} else if (is_numeric ( $HTTP_VARS ['attr_update_on_days'] ?? '')) {	// Give us all records updated in the last however many days.
 						$where_r [] = 'TO_DAYS(ia' . $i . '.update_on) >= (TO_DAYS(now())-' . $HTTP_VARS ['attr_update_on_days'] . ')';
 					}
 				}
@@ -883,7 +884,7 @@ function from_and_where_clause($HTTP_VARS, $column_display_config_rs = NULL, $qu
 					
 					$left_join_clause = 'LEFT JOIN item_attribute catia ON ' . 'catia.item_id = i.id AND (catia.instance_no = 0 OR catia.instance_no = ii.instance_no) AND catia.s_attribute_type = catsiat.s_attribute_type AND catia.order_no = catsiat.order_no';
 					
-					if (strlen ( $HTTP_VARS ['category'] ) > 0 || (strcasecmp ( $HTTP_VARS ['attr_match'], 'category' ) === 0 && strlen ( $HTTP_VARS ['attribute_val'] ) > 0)) {// Support specifying $attribute_val for $category where $attr_match=="category"!
+					if (strlen($HTTP_VARS['category'] ?? '') > 0 || (strcasecmp($HTTP_VARS ['attr_match'] ?? '', 'category' ) === 0 && strlen($HTTP_VARS['attribute_val'] ?? '') > 0)) {// Support specifying $attribute_val for $category where $attr_match=="category"!
 						// If item_type && item_type_group are not set!
 						if (strlen ( $HTTP_VARS ['attribute_type'] ) > 0 && ! is_array ( $HTTP_VARS ['s_item_type'] ) && strlen ( $HTTP_VARS ['s_item_type'] ) == 0 && strlen ( $HTTP_VARS ['s_item_type_group'] ) == 0) {
 							$where_r [] = 'catsat.s_attribute_type = \'' . $HTTP_VARS ['attribute_type'] . '\'';
@@ -1125,7 +1126,7 @@ function validate_item_instance_fields($s_status_type, &$status_comment, &$borro
 		// an indication that nothing should be done with it.
 		if ($borrow_duration !== FALSE && $borrow_duration !== NULL) {		//if already null, no need to check again.
 			// Ensure we have a valid $borrow_duration
-			if (is_numeric ( $borrow_duration )) {			//column cannot handle more than 999
+			if (is_numeric ( $borrow_duration ?? '')) {			//column cannot handle more than 999
 				if ($borrow_duration > 999)
 					$borrow_duration = '999';
 			} else {

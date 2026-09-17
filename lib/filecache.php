@@ -242,7 +242,8 @@ function file_cache_get_image_r($url, $type) {
 					
 					// let browser auto dither image
 					$file_r['thumbnail']['height'] = NULL;
-				} else if (is_numeric( $thumbnail_size_r['height'] ) && $thumbnail_size_r['height'] < $file_r['thumbnail']['height']) {
+
+				} else if (is_numeric( $thumbnail_size_r['height'] ?? '') && $thumbnail_size_r['height'] < $file_r['thumbnail']['height']) {
 					$file_r['thumbnail']['height'] = $thumbnail_size_r['height'];
 					
 					// let browser auto dither image
@@ -253,6 +254,7 @@ function file_cache_get_image_r($url, $type) {
 		
 		if (is_numeric($thumbnail_size_r ['width'] ?? ''))
 			$file_r ['thumbnail'] ['width'] = $thumbnail_size_r ['width'];
+
 		if (is_numeric($thumbnail_size_r ['height'] ?? ''))
 			$file_r ['thumbnail'] ['height'] = $thumbnail_size_r ['height'];
 		

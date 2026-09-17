@@ -55,7 +55,7 @@ $value, $dowrap, $prompt_mask, $onchange_event, $disabled );
 function get_item_input_field($fieldname, $item_attribute_type_r, $item_r, $value = NULL, $dowrap = TRUE, $prompt_mask = NULL, $onchange_event = NULL, $disabled = FALSE) {
 	if (is_array ( $item_attribute_type_r )) {
 		$s_attribute_type = $item_attribute_type_r ['s_attribute_type'];
-		$order_no = $item_attribute_type_r ['order_no'];
+		$order_no = $item_attribute_type_r ['order_no'] ?? NULL;
 		$prompt = $item_attribute_type_r ['prompt'];
 		$input_type = $item_attribute_type_r ['input_type'];
 		$compulsory_ind = $item_attribute_type_r ['compulsory_ind'];

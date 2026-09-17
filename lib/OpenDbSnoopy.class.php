@@ -42,7 +42,7 @@ class OpenDbSnoopy extends Snoopy {
 		if (isset($_SERVER['HTTP_USER_AGENT'])) {
 			$this->agent = $_SERVER['HTTP_USER_AGENT'];
 		} else {
-			$this->agent = 'Mozilla/5.0 (X11; CentOS) Gecko/20100101 Firefox/75.0';
+			$this->agent = 'Mozilla/5.0 (X11; Linux x86_64) Gecko/20100101 Firefox/152.0';
 		}
 
 		// in how many cases is this going to work?
